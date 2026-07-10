@@ -1,0 +1,31 @@
+# RetailIQ — Python dependencies
+# Install: pip install -r requirements.txt
+
+# Warehouse / transforms
+duckdb==1.5.4
+dbt-duckdb==1.10.1
+
+# Data
+pandas==2.2.3
+pyarrow==18.1.0        # duckdb ↔ pandas arrow bridge
+
+# ML
+scikit-learn==1.6.1
+numpy==2.2.3
+
+# API / AI layer
+anthropic==0.49.0
+
+# Orchestration
+dagster==1.10.11
+dagster-dbt==0.26.11
+
+# Dashboard backend (thin FastAPI layer, Phase 5)
+fastapi==0.115.12
+uvicorn==0.34.0
+
+# Dev / quality
+pytest==8.3.5
+sqlfluff==3.3.1         # SQL linting in dbt models
+
+xgboost==2.1.1

@@ -1,0 +1,100 @@
+/* ============================================================
+   RetailIQ Design Tokens — v2 "Terminal Calm"
+   Single source of truth. Every color/space/type value in the
+   app must reference a token here. No raw hex in components.
+   Aesthetic: Origin's calm density + RetailIQ green identity.
+
+   SCOPING NOTE (temporary, R0-only): the v1 dashboard (globals.css)
+   already owns `:root` with 5 colliding variable names (--accent,
+   --accent-dim, --accent-wash, --info, --font-mono — same names,
+   different values) that the other 5 pages still depend on. Rather
+   than bleed the new values into pages this phase doesn't touch,
+   these tokens are scoped to `.rq-v2` — the wrapper class applied
+   around Exec Summary's content only. Once the whole app migrates
+   (PRD build order, phase R7), change `.rq-v2` back to `:root` here
+   and this file becomes globally authoritative with no other edits.
+
+   --font-sans / --font-mono chain through the CSS variables next/font
+   generates (--font-inter / --font-jetbrains-mono, set on <html> in
+   app/layout.tsx) so the v2 primitives use the self-hosted, no-flash
+   fonts instead of the v1 system's separate Google Fonts <link>.
+   ============================================================ */
+
+.rq-v2 {
+  /* ---- SURFACES (black-forward, layered not flat) ---- */
+  --bg-base:        #0a0c10;   /* app background, deepest layer   */
+  --bg-rail:        #0d1016;   /* left navigation rail            */
+  --bg-panel:       #10141b;   /* cards / panels                  */
+  --bg-panel-hover: #141922;   /* panel hover / raised            */
+  --bg-inset:       #0c0f14;   /* wells, code drawers, inputs     */
+
+  /* ---- HAIRLINES (structure via light, not boxes) ---- */
+  --line-subtle:    #1a1f28;   /* default panel border            */
+  --line-strong:    #262d38;   /* active / focused border         */
+  --line-accent:    #1f3d31;   /* green-tinted divider            */
+
+  /* ---- TEXT (four-step ramp, disciplined) ---- */
+  --text-hi:        #e8edf4;   /* headlines, key numbers          */
+  --text-mid:       #9aa5b4;   /* body, labels                    */
+  --text-lo:        #5e6a7a;   /* captions, footnotes, eyebrows   */
+  --text-faint:     #3a4453;   /* disabled, axis gridlines        */
+
+  /* ---- ACCENT (ONE green, used with restraint) ---- */
+  --accent:         #34d399;   /* primary green — RetailIQ identity */
+  --accent-hi:      #6ee7b7;   /* hover / emphasis                */
+  --accent-dim:     #1f8b66;   /* pressed / muted                 */
+  --accent-wash:    rgba(52, 211, 153, 0.08);  /* faint fill      */
+  --accent-glow:    rgba(52, 211, 153, 0.22);  /* focus ring      */
+  --accent-ink:     #04140d;   /* text color ON a solid --accent fill (buttons) */
+
+  /* ---- SEMANTIC (data states — NOT decoration) ---- */
+  --pos:            #34d399;   /* positive delta (same as accent) */
+  --neg:            #f87171;   /* negative delta                  */
+  --warn:           #fbbf24;   /* caution / caveat                */
+  --info:           #60a5fa;   /* neutral callout                 */
+  /* low-confidence / small-n data gets --text-lo, never a color  */
+
+  /* ---- TYPE FACES ---- */
+  /* Display+body: Inter (variable). Data/mono: JetBrains Mono.   */
+  /* Mono is deliberate — numbers align, reads "instrument".      */
+  --font-sans: var(--font-inter), -apple-system, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), "SF Mono", ui-monospace, monospace;
+
+  /* ---- TYPE SCALE (major-third-ish, capped) ---- */
+  --t-display: 30px;   /* page H1                         */
+  --t-h2:      19px;   /* panel titles                   */
+  --t-body:    14px;   /* default                        */
+  --t-sm:      13px;   /* table cells, secondary         */
+  --t-cap:     11px;   /* eyebrows, footnotes (UPPERCASE) */
+  --t-kpi:     34px;   /* the big KPI numbers (mono)     */
+
+  --lh-tight:  1.15;
+  --lh-body:   1.55;
+  --tracking-cap: 0.08em;  /* eyebrow letter-spacing      */
+
+  /* ---- SPACING (4px base grid) ---- */
+  --s-1: 4px;   --s-2: 8px;   --s-3: 12px;  --s-4: 16px;
+  --s-5: 20px;  --s-6: 24px;  --s-8: 32px;  --s-10: 40px;
+  --s-12: 48px; --s-16: 64px;
+
+  /* ---- RADIUS (soft, not pill; terminal-adjacent) ---- */
+  --r-sm: 6px;   --r-md: 10px;  --r-lg: 14px;
+
+  /* ---- MOTION (engineered, not bouncy) ---- */
+  --ease-out:  cubic-bezier(0.16, 1, 0.3, 1);   /* decel, "settles" */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast:  120ms;
+  --dur-base:  220ms;
+  --dur-slow:  420ms;
+  --dur-hero:  1400ms;  /* the landing hero sparkline's one-shot draw-in only */
+
+  /* ---- ELEVATION (subtle; light does the work) ---- */
+  --shadow-panel: 0 1px 0 rgba(255,255,255,0.02) inset,
+                  0 8px 24px -12px rgba(0,0,0,0.6);
+  --shadow-pop:   0 12px 40px -8px rgba(0,0,0,0.7);
+}
+
+/* Respect reduced motion — quality floor, non-negotiable */
+@media (prefers-reduced-motion: reduce) {
+  .rq-v2 { --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; --dur-hero: 0ms; }
+}

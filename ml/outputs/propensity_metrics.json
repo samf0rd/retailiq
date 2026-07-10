@@ -1,0 +1,43 @@
+{
+  "model_comparison": {
+    "Logistic Regression": {
+      "cv_auc_mean": 0.5856,
+      "cv_auc_std": 0.0149,
+      "test_auc": 0.5941
+    },
+    "Random Forest": {
+      "cv_auc_mean": 0.5858,
+      "cv_auc_std": 0.0206,
+      "test_auc": 0.5958
+    },
+    "XGBoost": {
+      "cv_auc_mean": 0.569,
+      "cv_auc_std": 0.0214,
+      "test_auc": 0.5842
+    }
+  },
+  "winner": "Random Forest",
+  "winner_test_auc": 0.5958026965281312,
+  "feature_importance": {
+    "first_order_value": 0.18626,
+    "paid_installments": 0.13405,
+    "delivery_delta_days": 0.13122,
+    "approval_lag_hours": 0.08318,
+    "first_category_bed_bath_table": 0.06419,
+    "first_category_furniture_decor": 0.05132,
+    "review_score": 0.04779,
+    "first_category_electronics": 0.03035,
+    "paid_credit_card": 0.0194,
+    "first_category_cool_stuff": 0.01696,
+    "first_category_sports_leisure": 0.01627,
+    "first_category_watches_gifts": 0.01504,
+    "customer_state_SP": 0.01371,
+    "customer_state_RJ": 0.01219,
+    "customer_state_PR": 0.01125,
+    "customer_state_MG": 0.00973,
+    "customer_state_CE": 0.00928,
+    "customer_state_RS": 0.00894,
+    "customer_state_BA": 0.00879,
+    "first_category_other": 0.00877
+  }
+}

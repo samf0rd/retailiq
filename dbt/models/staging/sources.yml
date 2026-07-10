@@ -1,0 +1,98 @@
+version: 2
+
+sources:
+  - name: raw
+    description: >
+      Raw Olist e-commerce data loaded from CSV by ingestion/load_raw.py.
+      9 relational tables covering ~100k orders across Brazilian marketplaces,
+      2016–2018.
+    schema: raw
+    tables:
+      - name: orders
+        description: One row per order. Core fact table — all status + timestamp fields.
+        columns:
+          - name: order_id
+            description: Unique order identifier.
+            tests:
+              - unique
+              - not_null
+          - name: customer_id
+            tests:
+              - not_null
+
+      - name: order_items
+        description: One row per item within an order (orders can have multiple items).
+        columns:
+          - name: order_id
+            tests:
+              - not_null
+          - name: order_item_id
+            tests:
+              - not_null
+
+      - name: order_payments
+        description: Payment lines per order. An order can have multiple payment entries (installments, mixed methods).
+        columns:
+          - name: order_id
+            tests:
+              - not_null
+
+      - name: order_reviews
+        description: >
+          Customer review per order. Note: review_id is NOT unique in the raw Olist
+          dataset (789 duplicates). This is a known upstream data quality issue.
+          Test downgraded to warn. Deduplication handled in stg_order_reviews.
+        columns:
+          - name: review_id
+            tests:
+              - not_null
+              - unique:
+                  config:
+                    severity: warn
+
+      - name: customers
+        description: >
+          Customer dimension. customer_id is unique per order (Olist anonymisation);
+          customer_unique_id identifies the same person across multiple orders — critical
+          for cohort and repeat-purchase analysis.
+        columns:
+          - name: customer_id
+            tests:
+              - unique
+              - not_null
+          - name: customer_unique_id
+            tests:
+              - not_null
+
+      - name: sellers
+        description: Seller dimension — location only (marketplace anonymisation).
+        columns:
+          - name: seller_id
+            tests:
+              - unique
+              - not_null
+
+      - name: products
+        description: Product catalogue — category (in Portuguese), dimensions, weight.
+        columns:
+          - name: product_id
+            tests:
+              - unique
+              - not_null
+
+      - name: geolocation
+        description: Brazilian zip prefix → lat/lng + city/state. Multiple rows per zip prefix.
+        columns:
+          - name: geolocation_zip_code_prefix
+            tests:
+              - not_null
+
+      - name: product_category_name_translation
+        description: Maps Portuguese product category names to English.
+        columns:
+          - name: product_category_name
+            tests:
+              - not_null
+          - name: product_category_name_english
+            tests:
+              - not_null

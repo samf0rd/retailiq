@@ -1,0 +1,102 @@
+{
+  "elbow": {
+    "inertias": {
+      "2": 217477.86,
+      "3": 140629.01,
+      "4": 94193.54,
+      "5": 79188.09,
+      "6": 67264.69,
+      "7": 61836.73,
+      "8": 63165.33,
+      "9": 56231.03,
+      "10": 50879.83
+    },
+    "silhouettes": {
+      "2": 0.3985,
+      "3": 0.4628,
+      "4": 0.4897,
+      "5": 0.4161,
+      "6": 0.4425,
+      "7": 0.4311,
+      "8": 0.3606,
+      "9": 0.3737,
+      "10": 0.3326
+    },
+    "elbow_k": 4
+  },
+  "kmeans": {
+    "silhouette_score": 0.4886,
+    "k": 4,
+    "centroids": {
+      "recency_days": {
+        "0": 133.34,
+        "1": 393.32,
+        "2": 244.02,
+        "3": 226.0
+      },
+      "frequency": {
+        "0": 1.0,
+        "1": 1.0,
+        "2": 1.01,
+        "3": 2.11
+      },
+      "monetary_value": {
+        "0": 134.45,
+        "1": 133.63,
+        "2": 1159.54,
+        "3": 289.03
+      },
+      "quality_score": {
+        "0": 1.78,
+        "1": 1.12,
+        "2": 2.41,
+        "3": 3.9
+      }
+    }
+  },
+  "alignment": {
+    "agreement_rate_pct": 9.5
+  },
+  "segment_economics": [
+    {
+      "kmeans_segment": "Potential Loyalists",
+      "customer_count": 2471,
+      "avg_recency_days": 243.86,
+      "avg_orders": 1.01,
+      "avg_ltv": 1158.56,
+      "total_revenue": 2862789.52,
+      "pct_of_customers": 2.6,
+      "pct_of_revenue": 18.3
+    },
+    {
+      "kmeans_segment": "Champions",
+      "customer_count": 2846,
+      "avg_recency_days": 226.0,
+      "avg_orders": 2.11,
+      "avg_ltv": 289.03,
+      "total_revenue": 822589.15,
+      "pct_of_customers": 3.0,
+      "pct_of_revenue": 5.2
+    },
+    {
+      "kmeans_segment": "Need Attention",
+      "customer_count": 51515,
+      "avg_recency_days": 133.34,
+      "avg_orders": 1.0,
+      "avg_ltv": 134.42,
+      "total_revenue": 6924622.05,
+      "pct_of_customers": 54.4,
+      "pct_of_revenue": 44.2
+    },
+    {
+      "kmeans_segment": "Hibernating",
+      "customer_count": 37867,
+      "avg_recency_days": 393.32,
+      "avg_orders": 1.0,
+      "avg_ltv": 133.6,
+      "total_revenue": 5059054.08,
+      "pct_of_customers": 40.0,
+      "pct_of_revenue": 32.3
+    }
+  ]
+}

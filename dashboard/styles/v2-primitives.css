@@ -1,0 +1,82 @@
+/* ============================================================
+   RetailIQ v2 primitive styles — companion to tokens.css.
+   Only for what inline React styles can't express: :hover states
+   and @keyframes. Everything else on the primitives is inline
+   style using token values directly (see components/v2/*).
+   All classes are scoped by construction: every value here reads
+   a --token that only resolves inside .rq-v2 (see tokens.css), so
+   these rules render invisibly (no-op) anywhere outside that scope.
+   ============================================================ */
+
+.rq-panel {
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.rq-panel:hover {
+  border-color: var(--line-strong);
+}
+
+.rq-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.rq-eyebrow {
+  font-size: var(--t-cap);
+  letter-spacing: var(--tracking-cap);
+  text-transform: uppercase;
+  color: var(--text-lo);
+  font-weight: 500;
+}
+
+/* ---- StaggerIn: each direct child fades + rises 8px, 60ms apart ---- */
+@keyframes rq-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rq-stagger > * {
+  animation: rq-rise var(--dur-slow) var(--ease-out) both;
+}
+.rq-stagger > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.rq-stagger > *:nth-child(2) {
+  animation-delay: 60ms;
+}
+.rq-stagger > *:nth-child(3) {
+  animation-delay: 120ms;
+}
+.rq-stagger > *:nth-child(4) {
+  animation-delay: 180ms;
+}
+.rq-stagger > *:nth-child(5) {
+  animation-delay: 240ms;
+}
+.rq-stagger > *:nth-child(6) {
+  animation-delay: 300ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rq-stagger > * {
+    animation: none;
+  }
+}
+
+/* ---- SqlDrawer: slide + fade in from the right, one-shot on mount ----
+   Duration reads --dur-base, which the reduced-motion query in tokens.css
+   already collapses to 0ms — no separate override needed here. */
+@keyframes rq-drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

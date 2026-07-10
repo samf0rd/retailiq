@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: int_order_items_enriched
+    description: >
+      One row per order line item, enriched with product attributes (category,
+      weight, volume) and seller location. The join hub for mart_revenue and
+      mart_sellers — defines the join once, referenced many times.
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+      - name: order_item_id
+        tests:
+          - not_null
+      - name: line_total
+        tests:
+          - not_null
+
+  - name: int_orders_enriched
+    description: >
+      One row per order, enriched with customer identity (including
+      customer_unique_id for cross-order tracking), aggregated payment info,
+      review score, and pre-computed delivery performance flags.
+      The join hub for mart_cohorts, mart_logistics, and mart_rfm.
+      Note: order_id uniqueness is guaranteed by stg_orders upstream;
+      no unique test here as left joins can surface nulls from dim tables.
+    columns:
+      - name: order_id
+        tests:
+          - not_null

@@ -1,0 +1,12 @@
+retailiq:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      # Path is relative to where `dbt run` is executed (the dbt/ directory).
+      # If you run dbt from the repo root use: warehouse/retailiq.duckdb
+      # If you run from dbt/ directory use: ../warehouse/retailiq.duckdb
+      path: "../warehouse/retailiq.duckdb"
+      threads: 4
+      # Attach the raw schema so dbt can resolve `source()` refs to raw tables
+      # that were loaded by load_raw.py — no separate DB needed.

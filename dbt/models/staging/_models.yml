@@ -1,0 +1,123 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: >
+      One row per order. Timestamps cast, delivery durations derived.
+      Filtered to rows with a valid purchase timestamp.
+    columns:
+      - name: order_id
+        description: Primary key — unique order identifier.
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        tests:
+          - not_null
+      - name: order_status
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['delivered', 'shipped', 'canceled', 'unavailable',
+                       'invoiced', 'processing', 'created', 'approved']
+      - name: purchased_at
+        tests:
+          - not_null
+
+  - name: stg_customers
+    description: >
+      One row per customer_id (unique per order). customer_unique_id is the
+      true person identifier — use this for cross-order analysis.
+    columns:
+      - name: customer_id
+        tests:
+          - unique
+          - not_null
+      - name: customer_unique_id
+        tests:
+          - not_null
+
+  - name: stg_order_items
+    description: One row per order line item. order_id + order_item_id is the composite key.
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+      - name: order_item_id
+        tests:
+          - not_null
+      - name: product_id
+        tests:
+          - not_null
+      - name: seller_id
+        tests:
+          - not_null
+      - name: item_price
+        tests:
+          - not_null
+
+  - name: stg_order_payments
+    description: >
+      Payment lines per order. Multiple rows per order when a customer uses
+      multiple payment methods or installments.
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+      - name: payment_type
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['credit_card', 'boleto', 'voucher', 'debit_card', 'not_defined']
+      - name: payment_value
+        tests:
+          - not_null
+
+  - name: stg_order_reviews
+    description: >
+      One review per order. Note: review_id is NOT unique in the raw Olist
+      dataset (789 duplicates — known upstream data quality issue).
+      Uniqueness test downgraded to warn; deduplication handled here via
+      row_number() window function in the model.
+    columns:
+      - name: review_id
+        tests:
+          - not_null
+          - unique:
+              config:
+                severity: warn
+      - name: order_id
+        tests:
+          - not_null
+      - name: review_score
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
+
+  - name: stg_products
+    description: >
+      One row per product with English category name joined in.
+      Null categories labelled as 'unknown'.
+    columns:
+      - name: product_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_sellers
+    description: One row per seller. Location fields only.
+    columns:
+      - name: seller_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_geolocation
+    description: >
+      Zip prefix to lat/lng. ~1M rows (many per prefix).
+      Use int_geolocation_deduped for single-point-per-zip lookups.
+    columns:
+      - name: zip_code_prefix
+        tests:
+          - not_null

@@ -1,0 +1,712 @@
+{
+  "raw.orders": {
+    "layer": "raw",
+    "sql": null,
+    "description": "One row per order. Core fact table — all status + timestamp fields.",
+    "tests": [
+      {
+        "name": "unique",
+        "column": "order_id"
+      },
+      {
+        "name": "not_null",
+        "column": "order_id"
+      },
+      {
+        "name": "not_null",
+        "column": "customer_id"
+      }
+    ],
+    "lineage": {
+      "ref": [],
+      "source": []
+    },
+    "rowcount": 99441,
+    "highlight": null
+  },
+  "raw.order_items": {
+    "layer": "raw",
+    "sql": null,
+    "description": "One row per item within an order (orders can have multiple items).",
+    "tests": [
+      {
+        "name": "not_null",
+        "column": "order_id"
+      },
+      {
+        "name": "not_null",
+        "column": "order_item_id"
+      }
+    ],
+    "lineage": {
+      "ref": [],
+      "source": []
+    },
+    "rowcount": 112650,
+    "highlight": null
+  },
+  "raw.order_payments": {
+    "layer": "raw",
+    "sql": null,
+    "description": "Payment lines per order. An order can have multiple payment entries (installments, mixed methods).",
+    "tests": [
+      {
+        "name": "not_null",
+        "column": "order_id"
+      }
+    ],
+    "lineage": {
+      "ref": [],
+      "source": []
+    },
+    "rowcount": 103886,
+    "highlight": null
+  },
+  "raw.order_reviews": {
+    "layer": "raw",
+    "sql": null,
+    "description": "Customer review per order. Note: review_id is NOT unique in the raw Olist dataset (789 duplicates). This is a known upstream data quality issue. Test downgraded to warn. Deduplication handled in stg_order_reviews.",
+    "tests": [
+      {
+        "name": "not_null",
+        "column": "review_id"
+      },
+      {
+        "name": "unique",
+        "column": "review_id",
+        "config": {
+          "config": {
+            "severity": "warn"
+          }
+        }
+      }
+    ],
+    "lineage": {
+      "ref": [],
+      "source": []
+    },
+    "rowcount": 99224,
+    "highlight": null
+  },
+  "raw.customers": {
+    "layer": "raw",
+    "sql": null,
+    "description": "Customer dimension. customer_id is unique per order (Olist anonymisation); customer_unique_id identifies the same person across multiple orders — critical for cohort and repeat-purchase analysis.",
+    "tests": [
+      {
+        "name": "unique",
+        "column": "customer_id"
+      },
+      {
+        "name": "not_null",
+        "column": "customer_id"
+      },
+      {
+        "name": "not_null",
+        "column": "customer_unique_id"
+      }
+    ],
+    "lineage": {
+      "ref": [],
+      "source": []
+    },
+    "rowcount": 99441,
+    "highlight": null
+  },
+  "raw.sellers": {
+    "layer": "raw",
+    "sql": null,
+    "description": "Seller dimension — location only (marketplace anonymisation).",
+    "tests": [
+      {
+        "name": "unique",
+        "column": "seller_id"
+      },
+      {
+        "name": "not_null",
+        "column": "seller_id"
+      }
+    ],
+    "lineage": {
+      "ref": [],
+      "source": []
+    },
+    "rowcount": 3095,
+    "highlight": null
+  },
+  "raw.products": {
+    "layer": "raw",
+    "sql": null,
+    "description": "Product catalogue — category (in Portuguese), dimensions, weight.",
+    "tests": [
+      {
+        "name": "unique",
+        "column": "product_id"
+      },
+      {
+        "name": "not_null",
+        "column": "product_id"
+      }
+    ],
+    "lineage": {
+      "ref": [],
+      "source": []
+    },
+    "rowcount": 32951,
+    "highlight": null
+  },
+  "raw.geolocation": {
+    "layer": "raw",
+    "sql": null,
+    "description": "Brazilian zip prefix → lat/lng + city/state. Multiple rows per zip prefix.",
+    "tests": [
+      {
+        "name": "not_null",
+        "column": "geolocation_zip_code_prefix"
+      }
+    ],
+    "lineage": {
+      "ref": [],
+      "source": []
+    },
+    "rowcount": 1000163,
+    "highlight": null
+  },
+  "raw.product_category_name_translation": {
+    "layer": "raw",
+    "sql": null,
+    "description": "Maps Portuguese product category names to English.",
+    "tests": [
+      {
+        "name": "not_null",
+        "column": "product_category_name"
+      },
+      {
+        "name": "not_null",
+        "column": "product_category_name_english"
+      }
+    ],
+    "lineage": {
+      "ref": [],
+      "source": []
+    },
+    "rowcount": 71,
+    "highlight": null
+  },
+  "stg_customers": {
+    "layer": "staging",
+    "sql": "-- models/staging/stg_customers.sql\n--\n-- One row per customer_id (which is unique per order in Olist's anonymisation).\n-- customer_unique_id is the real person identifier — preserved here and used\n-- in mart_cohorts and mart_rfm for cross-order analysis.\n\nwith source as (\n    select * from {{ source('raw', 'customers') }}\n)\n\nselect\n    customer_id,\n    customer_unique_id,\n    customer_zip_code_prefix                    as zip_code_prefix,\n    customer_city                               as city,\n    customer_state                              as state\nfrom source\n",
+    "description": "One row per customer_id (unique per order). customer_unique_id is the true person identifier — use this for cross-order analysis.",
+    "tests": [
+      {
+        "name": "unique",
+        "column": "customer_id"
+      },
+      {
+        "name": "not_null",
+        "column": "customer_id"
+      },
+      {
+        "name": "not_null",
+        "column": "customer_unique_id"
+      }
+    ],
+    "lineage": {
+      "ref": [],
+      "source": [
+        "raw.customers"
+      ]
+    },
+    "highlight": null,
+    "rowcount": 99441
+  },
+  "stg_geolocation": {
+    "layer": "staging",
+    "sql": "-- models/staging/stg_geolocation.sql\n--\n-- Zip prefix → lat/lng/city/state. Multiple rows per zip prefix are expected\n-- (the source has ~1M rows for ~19k unique prefixes).\n-- Downstream models that need a single point per zip should aggregate here\n-- or use int_geolocation_deduped (built in Phase 2).\n\nwith source as (\n    select * from {{ source('raw', 'geolocation') }}\n)\n\nselect\n    geolocation_zip_code_prefix                     as zip_code_prefix,\n    cast(geolocation_lat as double)                 as lat,\n    cast(geolocation_lng as double)                 as lng,\n    geolocation_city                                as city,\n    geolocation_state                               as state\nfrom source\n",
+    "description": "Zip prefix to lat/lng. ~1M rows (many per prefix). Use int_geolocation_deduped for single-point-per-zip lookups.",
+    "tests": [
+      {
+        "name": "not_null",
+        "column": "zip_code_prefix"
+      }
+    ],
+    "lineage": {
+      "ref": [],
+      "source": [
+        "raw.geolocation"
+      ]
+    },
+    "highlight": null,
+    "rowcount": 1000163
+  },
+  "stg_orders": {
+    "layer": "staging",
+    "sql": "-- models/staging/stg_orders.sql\n--\n-- One row per order. Most timestamp columns are inferred correctly by DuckDB's\n-- read_csv_auto. order_estimated_delivery_date is cast via VARCHAR to handle\n-- both TIMESTAMP and blank-string VARCHAR inference across environments.\n\nwith source as (\n    select * from {{ source('raw', 'orders') }}\n),\n\ncleaned as (\n    select\n        order_id,\n        customer_id,\n        order_status,\n\n        -- direct timestamp columns (DuckDB infers these correctly from CSV)\n        order_purchase_timestamp                                                as purchased_at,\n        order_approved_at                                                       as approved_at,\n        order_delivered_carrier_date                                            as shipped_at,\n        order_delivered_customer_date                                           as delivered_at,\n\n        -- estimated delivery: cast to VARCHAR first, then to TIMESTAMP\n        -- this handles both environments where DuckDB infers it as TIMESTAMP\n        -- (real Olist data) or VARCHAR (blank strings on canceled orders)\n        try_cast(\n            nullif(trim(cast(order_estimated_delivery_date as varchar)), '')\n        as timestamp)                                                           as estimated_delivery_at,\n\n        -- derived durations\n        datediff('hour',\n            order_purchase_timestamp,\n            order_approved_at\n        )                                                                       as approval_lag_hours,\n\n        datediff('day',\n            order_purchase_timestamp,\n            order_delivered_customer_date\n        )                                                                       as actual_delivery_days,\n\n        datediff('day',\n            order_purchase_timestamp,\n            try_cast(\n                nullif(trim(cast(order_estimated_delivery_date as varchar)), '')\n            as timestamp)\n        )                                                                       as estimated_delivery_days,\n\n        datediff('day',\n            try_cast(\n                nullif(trim(cast(order_estimated_delivery_date as varchar)), '')\n            as timestamp),\n            order_delivered_customer_date\n        )                                                                       as delivery_delta_days,\n\n        -- date parts\n        date_trunc('month', order_purchase_timestamp)   as order_month,\n        date_trunc('year',  order_purchase_timestamp)   as order_year,\n        cast(order_purchase_timestamp as date)          as order_date\n\n    from source\n    where order_purchase_timestamp is not null\n)\n\nselect * from cleaned",
+    "description": "One row per order. Timestamps cast, delivery durations derived. Filtered to rows with a valid purchase timestamp.",
+    "tests": [
+      {
+        "name": "unique",
+        "column": "order_id"
+      },
+      {
+        "name": "not_null",
+        "column": "order_id"
+      },
+      {
+        "name": "not_null",
+        "column": "customer_id"
+      },
+      {
+        "name": "not_null",
+        "column": "order_status"
+      },
+      {
+        "name": "accepted_values",
+        "column": "order_status",
+        "config": {
+          "values": [
+            "delivered",
+            "shipped",
+            "canceled",
+            "unavailable",
+            "invoiced",
+            "processing",
+            "created",
+            "approved"
+          ]
+        }
+      },
+      {
+        "name": "not_null",
+        "column": "purchased_at"
+      }
+    ],
+    "lineage": {
+      "ref": [],
+      "source": [
+        "raw.orders"
+      ]
+    },
+    "highlight": null,
+    "rowcount": 99441
+  },
+  "stg_order_items": {
+    "layer": "staging",
+    "sql": "-- models/staging/stg_order_items.sql\n--\n-- One row per order-item (orders can contain multiple products).\n-- order_id + order_item_id is the composite natural key.\n-- price and freight_value are cast to DECIMAL for financial accuracy.\n\nwith source as (\n    select * from {{ source('raw', 'order_items') }}\n)\n\nselect\n    order_id,\n    order_item_id,\n    product_id,\n    seller_id,\n\n    cast(shipping_limit_date as timestamp) as shipping_limit_at,\n\n    cast(price          as decimal(12, 2)) as item_price,\n    cast(freight_value  as decimal(12, 2)) as freight_value,\n\n    -- total revenue contribution of this line item\n    cast(price as decimal(12, 2)) + cast(freight_value as decimal(12, 2)) as line_total\n\nfrom source\n",
+    "description": "One row per order line item. order_id + order_item_id is the composite key.",
+    "tests": [
+      {
+        "name": "not_null",
+        "column": "order_id"
+      },
+      {
+        "name": "not_null",
+        "column": "order_item_id"
+      },
+      {
+        "name": "not_null",
+        "column": "product_id"
+      },
+      {
+        "name": "not_null",
+        "column": "seller_id"
+      },
+      {
+        "name": "not_null",
+        "column": "item_price"
+      }
+    ],
+    "lineage": {
+      "ref": [],
+      "source": [
+        "raw.order_items"
+      ]
+    },
+    "highlight": null,
+    "rowcount": 112650
+  },
+  "stg_order_payments": {
+    "layer": "staging",
+    "sql": "-- models/staging/stg_order_payments.sql\n--\n-- One row per payment entry. An order can have multiple rows here when\n-- a customer pays with multiple methods or splits into installments.\n-- payment_sequential tracks the order of entries within an order.\n\nwith source as (\n    select * from {{ source('raw', 'order_payments') }}\n)\n\nselect\n    order_id,\n    payment_sequential,\n    payment_type,\n    payment_installments,\n    cast(payment_value as decimal(12, 2)) as payment_value\n\nfrom source\n",
+    "description": "Payment lines per order. Multiple rows per order when a customer uses multiple payment methods or installments.",
+    "tests": [
+      {
+        "name": "not_null",
+        "column": "order_id"
+      },
+      {
+        "name": "not_null",
+        "column": "payment_type"
+      },
+      {
+        "name": "accepted_values",
+        "column": "payment_type",
+        "config": {
+          "values": [
+            "credit_card",
+            "boleto",
+            "voucher",
+            "debit_card",
+            "not_defined"
+          ]
+        }
+      },
+      {
+        "name": "not_null",
+        "column": "payment_value"
+      }
+    ],
+    "lineage": {
+      "ref": [],
+      "source": [
+        "raw.order_payments"
+      ]
+    },
+    "highlight": null,
+    "rowcount": 103886
+  },
+  "stg_order_reviews": {
+    "layer": "staging",
+    "sql": "-- models/staging/stg_order_reviews.sql\n--\n-- One row per ORDER (not per review_id).\n--\n-- Two deduplication issues in the raw Olist dataset:\n--   1. 789 duplicate review_ids (same review_id, multiple rows) — noise in the data\n--   2. Some orders have multiple distinct review_ids — we keep the latest one\n--\n-- Both are resolved by deduplicating on order_id (the join key used downstream),\n-- keeping the row with the latest review_answer_timestamp.\n-- The uniqueness test on review_id is set to WARN to document issue #1.\n\nwith source as (\n    select * from {{ source('raw', 'order_reviews') }}\n),\n\ndeduped as (\n    select\n        review_id,\n        order_id,\n        cast(review_score as integer)               as review_score,\n        review_comment_title,\n        review_comment_message,\n        cast(review_creation_date   as timestamp)   as review_created_at,\n        cast(review_answer_timestamp as timestamp)  as review_answered_at,\n\n        -- deduplicate by order_id: keep the latest review per order\n        row_number() over (\n            partition by order_id\n            order by review_answer_timestamp desc nulls last\n        ) as _row_num\n\n    from source\n    where review_id is not null\n      and order_id  is not null\n),\n\ncleaned as (\n    select\n        review_id,\n        order_id,\n        review_score,\n        review_comment_title,\n        review_comment_message,\n        review_created_at,\n        review_answered_at,\n        case when review_score <= 2 then true else false end as is_negative_review\n    from deduped\n    where _row_num = 1\n)\n\nselect * from cleaned\n",
+    "description": "One review per order. Note: review_id is NOT unique in the raw Olist dataset (789 duplicates — known upstream data quality issue). Uniqueness test downgraded to warn; deduplication handled here via row_number() window function in the model.",
+    "tests": [
+      {
+        "name": "not_null",
+        "column": "review_id"
+      },
+      {
+        "name": "unique",
+        "column": "review_id",
+        "config": {
+          "config": {
+            "severity": "warn"
+          }
+        }
+      },
+      {
+        "name": "not_null",
+        "column": "order_id"
+      },
+      {
+        "name": "not_null",
+        "column": "review_score"
+      },
+      {
+        "name": "accepted_values",
+        "column": "review_score",
+        "config": {
+          "values": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      }
+    ],
+    "lineage": {
+      "ref": [],
+      "source": [
+        "raw.order_reviews"
+      ]
+    },
+    "highlight": null,
+    "rowcount": 98673
+  },
+  "stg_products": {
+    "layer": "staging",
+    "sql": "-- models/staging/stg_products.sql\n--\n-- One row per product. Joins the category translation table here at staging\n-- so every downstream model works with English category names from the start.\n-- Null categories (a known data gap in this dataset) are labelled explicitly.\n\nwith source as (\n    select * from {{ source('raw', 'products') }}\n),\n\ntranslation as (\n    select * from {{ source('raw', 'product_category_name_translation') }}\n),\n\njoined as (\n    select\n        p.product_id,\n\n        -- English category name; fall back to PT name if no translation exists\n        coalesce(\n            t.product_category_name_english,\n            p.product_category_name\n        )                                            as category_name_en,\n        p.product_category_name                      as category_name_pt,\n\n        cast(p.product_name_lenght       as integer) as product_name_length,\n        cast(p.product_description_lenght as integer) as product_description_length,\n        cast(p.product_photos_qty        as integer) as product_photos_qty,\n        cast(p.product_weight_g          as integer) as product_weight_g,\n        cast(p.product_length_cm         as integer) as product_length_cm,\n        cast(p.product_height_cm         as integer) as product_height_cm,\n        cast(p.product_width_cm          as integer) as product_width_cm,\n\n        -- derived: volumetric weight (cm³) — proxy for packaging cost\n        cast(p.product_length_cm as integer)\n            * cast(p.product_height_cm as integer)\n            * cast(p.product_width_cm  as integer) as volume_cm3\n\n    from source p\n    left join translation t\n        on p.product_category_name = t.product_category_name\n)\n\nselect * from joined\n",
+    "description": "One row per product with English category name joined in. Null categories labelled as 'unknown'.",
+    "tests": [
+      {
+        "name": "unique",
+        "column": "product_id"
+      },
+      {
+        "name": "not_null",
+        "column": "product_id"
+      }
+    ],
+    "lineage": {
+      "ref": [],
+      "source": [
+        "raw.products",
+        "raw.product_category_name_translation"
+      ]
+    },
+    "highlight": null,
+    "rowcount": 32951
+  },
+  "stg_sellers": {
+    "layer": "staging",
+    "sql": "-- models/staging/stg_sellers.sql\n--\n-- One row per seller. Location fields only (marketplace anonymisation).\n\nwith source as (\n    select * from {{ source('raw', 'sellers') }}\n)\n\nselect\n    seller_id,\n    seller_zip_code_prefix  as zip_code_prefix,\n    seller_city             as city,\n    seller_state            as state\nfrom source\n",
+    "description": "One row per seller. Location fields only.",
+    "tests": [
+      {
+        "name": "unique",
+        "column": "seller_id"
+      },
+      {
+        "name": "not_null",
+        "column": "seller_id"
+      }
+    ],
+    "lineage": {
+      "ref": [],
+      "source": [
+        "raw.sellers"
+      ]
+    },
+    "highlight": null,
+    "rowcount": 3095
+  },
+  "int_orders_enriched": {
+    "layer": "intermediate",
+    "sql": "-- models/intermediate/int_orders_enriched.sql\n--\n-- One row per order, enriched with:\n--   - customer identity (unique_id for cross-order analysis)\n--   - aggregated payment info (total paid, primary payment type)\n--   - review score\n--   - pre-computed delivery performance flags\n--\n-- mart_cohorts, mart_logistics, and mart_rfm all read from here.\n-- Keeping the join logic here means each mart stays focused on aggregation.\n\nwith orders as (\n    select * from {{ ref('stg_orders') }}\n),\n\ncustomers as (\n    select * from {{ ref('stg_customers') }}\n),\n\n-- Aggregate payments to one row per order: total amount paid + primary method\npayments_agg as (\n    select\n        order_id,\n        sum(payment_value)                                  as total_payment_value,\n        -- primary payment type = the one with the largest value on this order\n        first(payment_type order by payment_value desc)     as primary_payment_type,\n        sum(payment_installments)                           as total_installments,\n        count(*)                                            as payment_line_count\n    from {{ ref('stg_order_payments') }}\n    group by order_id\n),\n\n-- One review per order (already deduped in staging)\nreviews as (\n    select\n        order_id,\n        review_score,\n        is_negative_review,\n        review_created_at\n    from {{ ref('stg_order_reviews') }}\n)\n\nselect\n    -- order identity\n    o.order_id,\n    o.customer_id,\n\n    -- customer identity — customer_unique_id tracks the same person across orders\n    c.customer_unique_id,\n    c.city              as customer_city,\n    c.state             as customer_state,\n    c.zip_code_prefix   as customer_zip_code_prefix,\n\n    -- order status & timing\n    o.order_status,\n    o.purchased_at,\n    o.approved_at,\n    o.shipped_at,\n    o.delivered_at,\n    o.estimated_delivery_at,\n    o.order_date,\n    o.order_month,\n    o.order_year,\n\n    -- delivery performance (pre-computed in stg_orders)\n    o.approval_lag_hours,\n    o.actual_delivery_days,\n    o.estimated_delivery_days,\n    o.delivery_delta_days,          -- negative = early, positive = late\n    case\n        when o.delivery_delta_days > 0 then true\n        else false\n    end                             as is_late_delivery,\n\n    -- payment summary\n    p.total_payment_value,\n    p.primary_payment_type,\n    p.total_installments,\n    p.payment_line_count,\n\n    -- review\n    r.review_score,\n    r.is_negative_review,\n    r.review_created_at\n\nfrom orders o\nleft join customers    c  on o.customer_id = c.customer_id\nleft join payments_agg p  on o.order_id    = p.order_id\nleft join reviews      r  on o.order_id    = r.order_id\n",
+    "description": "One row per order, enriched with customer identity (including customer_unique_id for cross-order tracking), aggregated payment info, review score, and pre-computed delivery performance flags. The join hub for mart_cohorts, mart_logistics, and mart_rfm. Note: order_id uniqueness is guaranteed by stg_orders upstream; no unique test here as left joins can surface nulls from dim tables.",
+    "tests": [
+      {
+        "name": "not_null",
+        "column": "order_id"
+      }
+    ],
+    "lineage": {
+      "ref": [
+        "stg_orders",
+        "stg_customers",
+        "stg_order_payments",
+        "stg_order_reviews"
+      ],
+      "source": []
+    },
+    "highlight": null,
+    "rowcount": 99441
+  },
+  "int_order_items_enriched": {
+    "layer": "intermediate",
+    "sql": "-- models/intermediate/int_order_items_enriched.sql\n--\n-- One row per order line item, enriched with product and seller dimensions.\n-- This is the \"wide\" fact table that mart_revenue and mart_sellers read from.\n--\n-- Why intermediate and not directly in the mart?\n-- Because three different mart models need this same join. Defining it once\n-- here means a single place to fix if a column name changes upstream.\n\nwith order_items as (\n    select * from {{ ref('stg_order_items') }}\n),\n\nproducts as (\n    select * from {{ ref('stg_products') }}\n),\n\nsellers as (\n    select * from {{ ref('stg_sellers') }}\n)\n\nselect\n    -- item keys\n    oi.order_id,\n    oi.order_item_id,\n    oi.product_id,\n    oi.seller_id,\n\n    -- item financials\n    oi.item_price,\n    oi.freight_value,\n    oi.line_total,\n    oi.shipping_limit_at,\n\n    -- product attributes\n    p.category_name_en,\n    p.category_name_pt,\n    p.product_weight_g,\n    p.volume_cm3,\n    p.product_photos_qty,\n\n    -- seller location\n    s.city             as seller_city,\n    s.state            as seller_state,\n    s.zip_code_prefix  as seller_zip_code_prefix\n\nfrom order_items oi\nleft join products p  on oi.product_id = p.product_id\nleft join sellers  s  on oi.seller_id  = s.seller_id\n",
+    "description": "One row per order line item, enriched with product attributes (category, weight, volume) and seller location. The join hub for mart_revenue and mart_sellers — defines the join once, referenced many times.",
+    "tests": [
+      {
+        "name": "not_null",
+        "column": "order_id"
+      },
+      {
+        "name": "not_null",
+        "column": "order_item_id"
+      },
+      {
+        "name": "not_null",
+        "column": "line_total"
+      }
+    ],
+    "lineage": {
+      "ref": [
+        "stg_order_items",
+        "stg_products",
+        "stg_sellers"
+      ],
+      "source": []
+    },
+    "highlight": null,
+    "rowcount": 112650
+  },
+  "mart_cohorts": {
+    "layer": "mart",
+    "sql": "-- models/marts/mart_cohorts.sql\n--\n-- Customer cohort retention matrix.\n--\n-- SQL techniques demonstrated:\n--   Self-join (CTE referencing itself via first-order subquery)\n--   DATEDIFF on months to compute \"periods since first purchase\"\n--   Conditional COUNT / COUNT DISTINCT for retention rates\n--   NTILE (in mart_rfm) — similar pattern, shown here via manual quintiling\n--\n-- Grain: one row per (cohort_month, periods_since_first_order).\n-- Answers: \"Of all customers who first bought in month X, what % came back\n--           in month X+1, X+2, X+3 ...?\"\n-- This is the classic retention heatmap displayed on the Cohort page.\n--\n-- Important Olist data note: Olist is a marketplace, not a subscription product.\n-- Repeat-purchase rates are naturally low (most customers buy once). We present\n-- this honestly — the analysis shows WHEN repeat purchases happen, not that\n-- they're high. Framed correctly, this is still a strong demonstration.\n\n-- ── Step 1: first order date per customer (using unique id, not order id) ──\nwith first_orders as (\n    select\n        customer_unique_id,\n        min(order_month)                    as cohort_month,\n        min(purchased_at)                   as first_order_at\n    from {{ ref('int_orders_enriched') }}\n    where order_status in ('delivered', 'shipped', 'invoiced', 'approved')\n      and customer_unique_id is not null\n    group by customer_unique_id\n),\n\n-- ── Step 2: all orders per customer with their cohort month attached ────────\norders_with_cohort as (\n    select\n        o.customer_unique_id,\n        o.order_month,\n        o.purchased_at,\n        f.cohort_month,\n\n        -- how many months after their first purchase did this order happen?\n        -- month 0 = the cohort month itself (first purchase)\n        datediff(\n            'month',\n            f.cohort_month,\n            o.order_month\n        )                                   as periods_since_first_order\n\n    from {{ ref('int_orders_enriched') }}   o\n    inner join first_orders                 f\n        on o.customer_unique_id = f.customer_unique_id\n    where o.order_status in ('delivered', 'shipped', 'invoiced', 'approved')\n      and o.customer_unique_id is not null\n),\n\n-- ── Step 3: cohort size — how many unique customers in each cohort month ────\ncohort_sizes as (\n    select\n        cohort_month,\n        count(distinct customer_unique_id)  as cohort_size\n    from first_orders\n    group by cohort_month\n),\n\n-- ── Step 4: retention counts — distinct customers active in each period ─────\nretention_counts as (\n    select\n        cohort_month,\n        periods_since_first_order,\n        count(distinct customer_unique_id)  as active_customers\n\n    from orders_with_cohort\n    group by 1, 2\n),\n\n-- ── Step 5: join sizes to counts, compute retention rate ───────────────────\nfinal as (\n    select\n        rc.cohort_month,\n        rc.periods_since_first_order,\n        cs.cohort_size,\n        rc.active_customers,\n\n        -- retention rate: what % of the original cohort came back in this period\n        round(\n            rc.active_customers::double / nullif(cs.cohort_size, 0) * 100,\n        2)                                  as retention_rate_pct,\n\n        -- absolute churn from previous period (for waterfall charts)\n        rc.active_customers\n            - lag(rc.active_customers) over (\n                partition by rc.cohort_month\n                order by rc.periods_since_first_order\n              )                             as period_churn\n\n    from retention_counts   rc\n    inner join cohort_sizes cs  on rc.cohort_month = cs.cohort_month\n)\n\nselect * from final\norder by cohort_month, periods_since_first_order\n",
+    "description": "Customer retention matrix by acquisition cohort. Grain: one row per (cohort_month, periods_since_first_order).",
+    "tests": [
+      {
+        "name": "not_null",
+        "column": "cohort_month"
+      },
+      {
+        "name": "not_null",
+        "column": "periods_since_first_order"
+      },
+      {
+        "name": "not_null",
+        "column": "cohort_size"
+      },
+      {
+        "name": "not_null",
+        "column": "retention_rate_pct"
+      }
+    ],
+    "lineage": {
+      "ref": [
+        "int_orders_enriched"
+      ],
+      "source": []
+    },
+    "highlight": {
+      "id": "window-lag-sum",
+      "note": "LAG()/SUM() OVER — period-over-period comparison and running totals computed with window functions, no self-join required.",
+      "lines": [
+        91
+      ]
+    },
+    "rowcount": 220
+  },
+  "mart_logistics": {
+    "layer": "mart",
+    "sql": "-- models/marts/mart_logistics.sql\n--\n-- Delivery performance and logistics quality analysis.\n--\n-- SQL techniques demonstrated:\n--   Conditional aggregation with FILTER clause\n--   CORR()               → Pearson correlation (late delivery vs review score)\n--   PERCENTILE_CONT()    → median and p95 delivery days (exact percentile)\n--   CASE WHEN buckets    → delivery banding for histogram-style analysis\n--   Gap-and-island logic → consecutive late-delivery streaks by state/month\n--\n-- Two grains in separate CTEs, unioned to separate tables via view splits:\n--   1. By state × month  (regional × temporal breakdown)\n--   2. By seller_state   (operational: which seller locations drive lateness)\n--\n-- Feeds the Logistics & Ops dashboard page and the business recommendation\n-- on late delivery → 1-star review impact.\n\nwith delivery_facts as (\n    select\n        o.order_id,\n        o.order_month,\n        o.customer_state,\n        oi.seller_state,\n        o.actual_delivery_days,\n        o.estimated_delivery_days,\n        o.delivery_delta_days,\n        o.is_late_delivery,\n        o.approval_lag_hours,\n        o.review_score,\n        o.is_negative_review,\n        o.order_status,\n        oi.line_total,\n        oi.freight_value\n    from {{ ref('int_orders_enriched') }}     o\n    inner join {{ ref('int_order_items_enriched') }} oi\n        on o.order_id = oi.order_id\n    where o.order_status = 'delivered'\n      and o.delivered_at is not null\n      and o.actual_delivery_days is not null\n),\n\n-- ── Grain 1: state × month — regional logistics summary ────────────────────\nstate_month as (\n    select\n        customer_state,\n        order_month,\n\n        count(distinct order_id)                                        as delivered_orders,\n\n        -- delivery speed\n        round(avg(actual_delivery_days),    1)                          as avg_delivery_days,\n        round(avg(estimated_delivery_days), 1)                          as avg_estimated_days,\n        round(avg(delivery_delta_days),     1)                          as avg_delta_days,\n\n        -- percentiles (PERCENTILE_CONT = interpolated exact percentile)\n        round(percentile_cont(0.50) within group\n              (order by actual_delivery_days), 1)                       as median_delivery_days,\n        round(percentile_cont(0.95) within group\n              (order by actual_delivery_days), 1)                       as p95_delivery_days,\n\n        -- late delivery rate\n        round(\n            count(*) filter (where is_late_delivery = true)::double\n            / nullif(count(*), 0) * 100,\n        2)                                                              as late_rate_pct,\n\n        -- review quality for late vs on-time (avg by subgroup)\n        round(avg(review_score), 2)                                     as avg_review_score,\n        round(avg(review_score)\n              filter (where is_late_delivery = true), 2)                as avg_review_score_late,\n        round(avg(review_score)\n              filter (where is_late_delivery = false), 2)               as avg_review_score_ontime,\n\n        -- CORR: Pearson correlation between delivery delta and review score\n        -- Expect negative: larger delta (more late) → lower review score\n        round(corr(delivery_delta_days, review_score::double), 3)       as delivery_review_correlation,\n\n        -- freight\n        round(avg(freight_value), 2)                                    as avg_freight_value,\n        round(sum(freight_value), 2)                                    as total_freight_revenue\n\n    from delivery_facts\n    group by customer_state, order_month\n),\n\n-- ── Grain 2: delivery time banding — for distribution/histogram chart ──────\ndelivery_bands as (\n    select\n        customer_state,\n        case\n            when actual_delivery_days <= 7  then '01. 0–7 days'\n            when actual_delivery_days <= 14 then '02. 8–14 days'\n            when actual_delivery_days <= 21 then '03. 15–21 days'\n            when actual_delivery_days <= 30 then '04. 22–30 days'\n            else                                 '05. 30+ days'\n        end                                                             as delivery_band,\n        count(distinct order_id)                                        as order_count,\n        round(avg(review_score), 2)                                     as avg_review_score\n    from delivery_facts\n    group by customer_state, delivery_band\n),\n\n-- ── Gap-and-island: consecutive late months per state ─────────────────────\n-- Identifies \"streaks\" of consecutive months where late_rate_pct > 20%.\n-- This is the gap-and-island pattern: assign a group number to consecutive\n-- rows sharing the same condition, then aggregate each group.\n--\n-- Technique:\n--   row_number() OVER (ORDER BY month)          — global row position\n--   row_number() OVER (PARTITION BY is_bad_month ORDER BY month) — position within subgroup\n--   Difference of the two = constant for each consecutive streak\nflagged_months as (\n    select\n        customer_state,\n        order_month,\n        late_rate_pct,\n        late_rate_pct > 20 as is_bad_month,\n\n        row_number() over (\n            partition by customer_state\n            order by order_month\n        ) as rn_all,\n\n        row_number() over (\n            partition by customer_state, (late_rate_pct > 20)\n            order by order_month\n        ) as rn_within_flag\n\n    from state_month\n),\n\nlate_streaks as (\n    select\n        customer_state,\n        min(order_month)                    as streak_start,\n        max(order_month)                    as streak_end,\n        count(*)                            as consecutive_bad_months,\n        round(avg(late_rate_pct), 1)        as avg_late_rate_during_streak\n    from flagged_months\n    where is_bad_month = true\n    group by customer_state, (rn_all - rn_within_flag)\n    having count(*) >= 2      -- only flag streaks of 2+ consecutive bad months\n)\n\n-- ── Final output: join grains for the dashboard ────────────────────────────\n-- The dashboard reads each CTE result directly via separate mart views,\n-- but we expose the primary grain (state × month) as the main table,\n-- and register the secondary grains as separate mart models below.\nselect\n    sm.*,\n    ls.streak_start                         as latest_streak_start,\n    ls.streak_end                           as latest_streak_end,\n    ls.consecutive_bad_months               as latest_streak_length\nfrom state_month sm\nleft join (\n    -- attach the most recent bad streak per state\n    select distinct on (customer_state)\n        customer_state, streak_start, streak_end, consecutive_bad_months\n    from late_streaks\n    order by customer_state, streak_end desc\n) ls on sm.customer_state = ls.customer_state\norder by customer_state, order_month\n",
+    "description": "Delivery performance by customer_state × order_month. PERCENTILE_CONT() for median/p95 delivery days, CORR() for delivery-review correlation, gap-and-island logic for consecutive late-delivery streaks by state. Grain: one row per (customer_state, order_month).",
+    "tests": [
+      {
+        "name": "not_null",
+        "column": "customer_state"
+      },
+      {
+        "name": "not_null",
+        "column": "order_month"
+      },
+      {
+        "name": "not_null",
+        "column": "late_rate_pct"
+      }
+    ],
+    "lineage": {
+      "ref": [
+        "int_orders_enriched",
+        "int_order_items_enriched"
+      ],
+      "source": []
+    },
+    "highlight": {
+      "id": "gap-and-island",
+      "note": "Gap-and-island — two row_number() calls (global position vs. position within the flagged subgroup); their difference is constant for each consecutive run, so GROUP BY on that difference isolates each streak without a procedural loop.",
+      "lines": [
+        120,
+        125,
+        142
+      ]
+    },
+    "rowcount": 556
+  },
+  "mart_margin": {
+    "layer": "mart",
+    "sql": "-- models/marts/mart_margin.sql\n--\n-- Estimated contribution margin by category and month — the finance-moat\n-- model (REDESIGN_SPEC.md §2.4).\n--\n-- Olist gives us item_price and freight_value but NO cost-of-goods-sold —\n-- sellers on the marketplace never disclose COGS to the platform. So this\n-- model does what a capital-markets / FP&A analyst does when the ledger\n-- doesn't hand you cost directly: apply a STATED, DOCUMENTED assumed\n-- gross-margin schedule and flag every downstream number as an estimate.\n--\n-- ═══════════════════════════════════════════════════════════════════════\n-- THIS IS ILLUSTRATIVE, NOT ACTUAL. Every \"contribution\" figure produced by\n-- this model is item_price × an assumed category margin, minus real freight\n-- cost. It is not derived from seller-reported cost data (none exists in\n-- this dataset). Every consuming surface must label it\n-- \"Est. contribution (assumed-margin model — see methodology)\".\n-- ═══════════════════════════════════════════════════════════════════════\n--\n-- Assumed gross-margin schedule — one row per category band, every number\n-- sourced. Bands were chosen by grouping Olist's 74 product categories into\n-- retail-recognizable groups, then anchored to published Brazilian retail\n-- and e-commerce gross-margin benchmarks. Because Olist sellers are\n-- marketplace resellers (not brand owners running vertically-integrated\n-- DTC), each anchor leans toward the CONSERVATIVE (lower) end of its\n-- published range rather than brand-level DTC economics.\n--\n-- Sources (accessed 2026-07-09):\n--   - Sebrae (Brazilian small-business support agency): general retail\n--     gross margin commonly 10-20%; multi-brand apparel retail markup\n--     commonly 2.5-3x cost (~60-67% implied gross margin).\n--   - Empreender.com.br: Brazilian retail electronics margins 10-30%,\n--     compressed by price transparency and brand competition.\n--   - Onramp Funds, \"10 Profit Margin Benchmarks for eCommerce\" (2025):\n--     home goods 35-55% gross margin; food & beverage 15-25% gross margin.\n--   - Eightx, \"Average Ecommerce Profit Margins by Industry\" (2026):\n--     beauty/personal-care DTC brands 65-85% gross margin (median ~69%).\n--\n-- These are ANCHORS for a documented assumption, not measured Olist data.\n-- Reasonable analysts could pick different points within each published\n-- range; the point of stating them here is that every number in this\n-- model traces back to a labeled, citable assumption instead of a silent\n-- guess.\nwith margin_schedule as (\n    select * from (\n        values\n            -- band,                                  assumed_margin_pct, rationale\n            ('electronics_tech',                        0.12, 'BR retail electronics gross margin 10-30% (Empreender/Sebrae); marketplace resale sits at the low end due to price transparency and brand competition.'),\n            ('apparel_fashion',                          0.45, 'BR multi-brand apparel markup ~2.5-3x cost implies ~60-67% gross; using a conservative marketplace-resale anchor of 45% (Sebrae/Toyoshima Contabilidade).'),\n            ('health_beauty_personal_care',               0.40, 'Global beauty DTC gross margin 65-85% (Eightx 2026); discounted materially for marketplace resale economics rather than brand-owner economics.'),\n            ('home_furniture_housewares',                 0.35, 'US home-goods e-commerce gross margin 35-55% (Onramp Funds 2025); low end used for marketplace resale.'),\n            ('food_drink',                                0.18, 'Food & beverage e-commerce gross margin 15-25% (Onramp Funds 2025) — thin, competitive, commodity-like.'),\n            ('books_music_media',                         0.20, 'Books/media retail is traditionally thin-margin and price-competitive (list-price competition, publisher-set pricing).'),\n            ('toys_sports_leisure_gifts',                 0.32, 'Discretionary/leisure goods — mid-range retail markup, between electronics and apparel bands.'),\n            ('construction_tools_industrial_auto',        0.25, 'Trade/industrial and auto-parts goods — competitive B2B-adjacent pricing, lower consumer markup than lifestyle categories.'),\n            ('other_general_merchandise',                 0.30, 'Default/blended band for unmapped or catch-all categories (e.g. market_place, uncategorised) — general BR retail blended estimate (Sebrae).')\n    ) as t(margin_band, assumed_margin_pct, margin_rationale)\n),\n\n-- ── Step 1: category → margin band mapping ─────────────────────────────────\n-- Every one of Olist's 74 product categories is mapped to exactly one band\n-- above. Unmapped categories fall through to 'other_general_merchandise'.\ncategory_band_map as (\n    select * from (\n        values\n            ('air_conditioning', 'electronics_tech'), ('audio', 'electronics_tech'),\n            ('cine_photo', 'electronics_tech'), ('computers', 'electronics_tech'),\n            ('computers_accessories', 'electronics_tech'), ('consoles_games', 'electronics_tech'),\n            ('electronics', 'electronics_tech'), ('fixed_telephony', 'electronics_tech'),\n            ('home_appliances', 'electronics_tech'), ('home_appliances_2', 'electronics_tech'),\n            ('home_comfort_2', 'electronics_tech'), ('home_confort', 'electronics_tech'),\n            ('pc_gamer', 'electronics_tech'), ('portateis_cozinha_e_preparadores_de_alimentos', 'electronics_tech'),\n            ('small_appliances', 'electronics_tech'), ('small_appliances_home_oven_and_coffee', 'electronics_tech'),\n            ('tablets_printing_image', 'electronics_tech'), ('telephony', 'electronics_tech'),\n\n            ('fashio_female_clothing', 'apparel_fashion'), ('fashion_bags_accessories', 'apparel_fashion'),\n            ('fashion_childrens_clothes', 'apparel_fashion'), ('fashion_male_clothing', 'apparel_fashion'),\n            ('fashion_shoes', 'apparel_fashion'), ('fashion_sport', 'apparel_fashion'),\n            ('fashion_underwear_beach', 'apparel_fashion'), ('luggage_accessories', 'apparel_fashion'),\n            ('watches_gifts', 'apparel_fashion'),\n\n            ('baby', 'health_beauty_personal_care'), ('diapers_and_hygiene', 'health_beauty_personal_care'),\n            ('health_beauty', 'health_beauty_personal_care'), ('perfumery', 'health_beauty_personal_care'),\n\n            ('bed_bath_table', 'home_furniture_housewares'), ('flowers', 'home_furniture_housewares'),\n            ('furniture_bedroom', 'home_furniture_housewares'), ('furniture_decor', 'home_furniture_housewares'),\n            ('furniture_living_room', 'home_furniture_housewares'), ('furniture_mattress_and_upholstery', 'home_furniture_housewares'),\n            ('garden_tools', 'home_furniture_housewares'), ('home_construction', 'home_furniture_housewares'),\n            ('housewares', 'home_furniture_housewares'), ('kitchen_dining_laundry_garden_furniture', 'home_furniture_housewares'),\n            ('la_cuisine', 'home_furniture_housewares'), ('office_furniture', 'home_furniture_housewares'),\n\n            ('drinks', 'food_drink'), ('food', 'food_drink'), ('food_drink', 'food_drink'),\n\n            ('books_general_interest', 'books_music_media'), ('books_imported', 'books_music_media'),\n            ('books_technical', 'books_music_media'), ('cds_dvds_musicals', 'books_music_media'),\n            ('dvds_blu_ray', 'books_music_media'), ('music', 'books_music_media'),\n            ('musical_instruments', 'books_music_media'),\n\n            ('art', 'toys_sports_leisure_gifts'), ('arts_and_craftmanship', 'toys_sports_leisure_gifts'),\n            ('christmas_supplies', 'toys_sports_leisure_gifts'), ('cool_stuff', 'toys_sports_leisure_gifts'),\n            ('party_supplies', 'toys_sports_leisure_gifts'), ('pet_shop', 'toys_sports_leisure_gifts'),\n            ('sports_leisure', 'toys_sports_leisure_gifts'), ('stationery', 'toys_sports_leisure_gifts'),\n            ('toys', 'toys_sports_leisure_gifts'),\n\n            ('agro_industry_and_commerce', 'construction_tools_industrial_auto'), ('auto', 'construction_tools_industrial_auto'),\n            ('construction_tools_construction', 'construction_tools_industrial_auto'), ('construction_tools_lights', 'construction_tools_industrial_auto'),\n            ('construction_tools_safety', 'construction_tools_industrial_auto'), ('costruction_tools_garden', 'construction_tools_industrial_auto'),\n            ('costruction_tools_tools', 'construction_tools_industrial_auto'), ('industry_commerce_and_business', 'construction_tools_industrial_auto'),\n            ('security_and_services', 'construction_tools_industrial_auto'), ('signaling_and_security', 'construction_tools_industrial_auto'),\n\n            ('market_place', 'other_general_merchandise'), ('uncategorised', 'other_general_merchandise')\n    ) as t(category_name_en, margin_band)\n),\n\n-- ── Step 2: order-item level facts, same completed-order filter as mart_revenue ──\norder_item_facts as (\n    select\n        oi.order_id,\n        coalesce(oi.category_name_en, 'uncategorised') as category_name_en,\n        oi.item_price,\n        oi.freight_value,\n        o.order_month\n    from {{ ref('int_order_items_enriched') }} oi\n    inner join {{ ref('int_orders_enriched') }}  o\n        on oi.order_id = o.order_id\n    where o.order_status in ('delivered', 'shipped', 'invoiced', 'approved')\n),\n\n-- ── Step 3: attach margin band + assumed % to every line item ──────────────\nitem_with_margin as (\n    select\n        f.order_month,\n        f.category_name_en,\n        coalesce(m.margin_band, 'other_general_merchandise')            as margin_band,\n        coalesce(s.assumed_margin_pct, s_default.assumed_margin_pct)    as assumed_margin_pct,\n        f.order_id,\n        f.item_price,\n        f.freight_value,\n        -- contribution = item_price * assumed_margin_pct - freight_value\n        round(f.item_price * coalesce(s.assumed_margin_pct, s_default.assumed_margin_pct) - f.freight_value, 2) as contribution\n    from order_item_facts f\n    left join category_band_map m  on f.category_name_en = m.category_name_en\n    left join margin_schedule s    on coalesce(m.margin_band, 'other_general_merchandise') = s.margin_band\n    left join margin_schedule s_default on s_default.margin_band = 'other_general_merchandise'\n),\n\n-- ── Step 4: aggregate to category x month grain ─────────────────────────────\nfinal as (\n    select\n        order_month,\n        category_name_en,\n        margin_band,\n        assumed_margin_pct,\n        count(distinct order_id)                    as order_count,\n        count(*)                                     as item_count,\n        round(sum(item_price), 2)                    as total_item_price,\n        round(sum(freight_value), 2)                 as total_freight_value,\n        round(sum(item_price * assumed_margin_pct), 2) as est_gross_margin_amount,\n        round(sum(contribution), 2)                  as est_contribution,\n        round(sum(contribution) / nullif(count(distinct order_id), 0), 2) as est_contribution_per_order\n    from item_with_margin\n    group by 1, 2, 3, 4\n)\n\nselect * from final\norder by order_month, est_contribution desc\n",
+    "description": "",
+    "tests": [],
+    "lineage": {
+      "ref": [
+        "int_order_items_enriched",
+        "int_orders_enriched"
+      ],
+      "source": []
+    },
+    "highlight": null,
+    "rowcount": 1278
+  },
+  "mart_revenue": {
+    "layer": "mart",
+    "sql": "-- models/marts/mart_revenue.sql\n--\n-- Monthly revenue analytics — the primary SQL showcase model.\n--\n-- SQL techniques demonstrated:\n--   LAG()           → month-over-month revenue growth\n--   SUM() OVER()    → running/cumulative revenue totals\n--   RANK()          → category revenue ranking per month\n--   FILTER clause   → conditional aggregation without CASE WHEN noise\n--   CTEs            → step-by-step readable transformation chain\n--\n-- Grain: one row per (order_month, category_name_en).\n-- The dashboard Revenue Deep Dive page reads directly from this table.\n\n-- ── Step 1: base revenue facts ─────────────────────────────────────────────\nwith order_item_facts as (\n    select\n        oi.order_id,\n        oi.category_name_en,\n        oi.item_price,\n        oi.freight_value,\n        oi.line_total,\n        o.order_month,\n        o.order_date,\n        o.customer_state,\n        o.order_status,\n        o.primary_payment_type,\n        o.total_payment_value\n    from {{ ref('int_order_items_enriched') }} oi\n    inner join {{ ref('int_orders_enriched') }}  o\n        on oi.order_id = o.order_id\n    -- only count revenue from orders that actually completed\n    where o.order_status in ('delivered', 'shipped', 'invoiced', 'approved')\n),\n\n-- ── Step 2: monthly revenue by category ────────────────────────────────────\nmonthly_category as (\n    select\n        order_month,\n        coalesce(category_name_en, 'uncategorised') as category_name_en,\n\n        -- volume\n        count(distinct order_id)                as order_count,\n        count(*)                                as item_count,\n\n        -- revenue components\n        round(sum(item_price),    2)            as product_revenue,\n        round(sum(freight_value), 2)            as freight_revenue,\n        round(sum(line_total),    2)            as gross_revenue,\n\n        -- average order value for this category-month\n        round(\n            sum(item_price) / nullif(count(distinct order_id), 0),\n        2)                                      as avg_item_price\n\n    from order_item_facts\n    group by 1, 2\n),\n\n-- ── Step 3: monthly totals (all categories combined) ───────────────────────\nmonthly_total as (\n    select\n        order_month,\n        round(sum(gross_revenue), 2)            as total_gross_revenue,\n        sum(order_count)                        as total_orders,\n        sum(item_count)                         as total_items\n    from monthly_category\n    group by 1\n),\n\n-- ── Step 4: window functions — growth, running totals, ranking ─────────────\nwith_windows as (\n    select\n        mc.order_month,\n        mc.category_name_en,\n        mc.order_count,\n        mc.item_count,\n        mc.product_revenue,\n        mc.freight_revenue,\n        mc.gross_revenue,\n        mc.avg_item_price,\n\n        -- monthly totals (joined in so we can compute category share)\n        mt.total_gross_revenue,\n        mt.total_orders,\n\n        -- category revenue share of month total\n        round(\n            mc.gross_revenue / nullif(mt.total_gross_revenue, 0) * 100,\n        2)                                      as revenue_share_pct,\n\n        -- ── WINDOW FUNCTIONS ──────────────────────────────────────────────\n\n        -- LAG: previous month's revenue for this category → enables MoM growth\n        lag(mc.gross_revenue) over (\n            partition by mc.category_name_en\n            order by mc.order_month\n        )                                       as prev_month_revenue,\n\n        -- MoM growth % (calculated below in next CTE to allow null handling)\n        -- SUM OVER: running cumulative revenue per category across all months\n        sum(mc.gross_revenue) over (\n            partition by mc.category_name_en\n            order by mc.order_month\n            rows between unbounded preceding and current row\n        )                                       as cumulative_revenue,\n\n        -- SUM OVER: running cumulative total revenue (all categories)\n        sum(mt.total_gross_revenue) over (\n            order by mc.order_month\n            rows between unbounded preceding and current row\n        )                                       as cumulative_total_revenue,\n\n        -- RANK: category revenue rank within each month\n        rank() over (\n            partition by mc.order_month\n            order by mc.gross_revenue desc\n        )                                       as category_rank_in_month\n\n    from monthly_category mc\n    inner join monthly_total mt on mc.order_month = mt.order_month\n),\n\n-- ── Step 5: compute growth % cleanly (avoids division in window clause) ────\nfinal as (\n    select\n        *,\n        -- MoM revenue growth for this category\n        case\n            when prev_month_revenue is null     then null   -- first month, no prior\n            when prev_month_revenue = 0         then null   -- avoid division by zero\n            else round(\n                (gross_revenue - prev_month_revenue) / prev_month_revenue * 100,\n            2)\n        end                                     as mom_growth_pct,\n\n        -- flag top-3 categories by revenue in each month (for dashboard highlights)\n        category_rank_in_month <= 3             as is_top3_category\n\n    from with_windows\n)\n\nselect * from final\norder by order_month, category_rank_in_month\n",
+    "description": "Monthly revenue by category. Window functions: LAG() for MoM growth, SUM() OVER() for running totals, RANK() for category ranking per month. Grain: one row per (order_month, category_name_en).",
+    "tests": [
+      {
+        "name": "not_null",
+        "column": "order_month"
+      },
+      {
+        "name": "not_null",
+        "column": "category_name_en"
+      },
+      {
+        "name": "not_null",
+        "column": "gross_revenue"
+      }
+    ],
+    "lineage": {
+      "ref": [
+        "int_order_items_enriched",
+        "int_orders_enriched"
+      ],
+      "source": []
+    },
+    "highlight": {
+      "id": "rank",
+      "note": "RANK() OVER — ranks rows within a partition (e.g. category-within-month), ties handled natively instead of a manual tie-break.",
+      "lines": [
+        115
+      ]
+    },
+    "rowcount": 1278
+  },
+  "mart_rfm": {
+    "layer": "mart",
+    "sql": "-- models/marts/mart_rfm.sql\n--\n-- RFM (Recency, Frequency, Monetary) customer scoring.\n--\n-- SQL techniques demonstrated:\n--   NTILE(5) OVER()   → quintile bucketing (the cleanest way to score)\n--   Multiple window partitions in one model\n--   CASE WHEN on quintile combos → named segments (Champions, At-Risk, etc.)\n--   DATE_DIFF for recency calculation relative to a snapshot date\n--\n-- Grain: one row per customer_unique_id.\n-- Feeds the ML segmentation (ml/segmentation.py reads this as input features)\n-- and the Customer Segments dashboard page directly.\n--\n-- RFM explained:\n--   R = how recently did they buy?    (lower days = better → high score)\n--   F = how many orders total?        (more = better → high score)\n--   M = how much did they spend?      (more = better → high score)\n-- Each dimension is split into 5 equal buckets (NTILE 5). Score 5 = best.\n\nwith order_facts as (\n    select\n        customer_unique_id,\n        order_id,\n        purchased_at,\n        -- A handful of Olist orders have no matching payment record.\n        -- Coalesce to 0 here (row level) so it's explicit: missing payment\n        -- means zero known spend for that order, not an unknown customer.\n        coalesce(total_payment_value, 0)   as total_payment_value,\n        order_status\n    from {{ ref('int_orders_enriched') }}\n    where order_status in ('delivered', 'shipped', 'invoiced', 'approved')\n      and customer_unique_id is not null\n),\n\n-- ── Step 1: raw RFM metrics per customer ───────────────────────────────────\ncustomer_metrics as (\n    select\n        customer_unique_id,\n\n        -- Recency: days since last purchase (snapshot = max date in dataset)\n        datediff(\n            'day',\n            max(purchased_at),\n            (select max(purchased_at) from order_facts)\n        )                                   as recency_days,\n\n        -- Frequency: number of distinct orders\n        count(distinct order_id)            as frequency,\n\n        -- Monetary: total spend across all orders\n        round(sum(total_payment_value), 2)  as monetary_value,\n\n        -- Extra context columns for the dashboard\n        min(purchased_at)                   as first_order_at,\n        max(purchased_at)                   as last_order_at,\n        count(distinct order_id)            as order_count\n\n    from order_facts\n    group by customer_unique_id\n),\n\n-- ── Step 2: NTILE quintile scoring ─────────────────────────────────────────\n-- NTILE(5) divides all customers into 5 equal-sized buckets ordered by the metric.\n-- For recency: we flip the order (lower days = better = higher score).\n-- For frequency and monetary: higher = better = higher score.\nscored as (\n    select\n        *,\n\n        -- R score: 5 = most recent buyer, 1 = oldest (REVERSED order)\n        ntile(5) over (order by recency_days asc)   as r_score,\n\n        -- F score: 5 = most frequent buyer\n        ntile(5) over (order by frequency asc)      as f_score,\n\n        -- M score: 5 = highest spender\n        ntile(5) over (order by monetary_value asc) as m_score\n\n    from customer_metrics\n),\n\n-- ── Step 3: composite RFM score + named segment ────────────────────────────\nsegmented as (\n    select\n        *,\n\n        -- simple additive composite (3–15 range)\n        r_score + f_score + m_score             as rfm_score,\n\n        -- named segment — logic mirrors standard RFM playbook\n        case\n            when r_score >= 4 and f_score >= 4 and m_score >= 4\n                then 'Champions'            -- bought recently, often, and big\n            when r_score >= 3 and f_score >= 3\n                then 'Loyal Customers'      -- consistent buyers\n            when r_score >= 4 and f_score <= 2\n                then 'Recent Customers'     -- new buyers, frequency not yet built\n            when r_score >= 3 and f_score <= 2 and m_score >= 3\n                then 'Potential Loyalists'  -- decent spend, can be cultivated\n            when r_score <= 2 and f_score >= 3\n                then 'At Risk'              -- used to buy often, gone quiet\n            when r_score = 1 and f_score >= 2\n                then 'Cannot Lose Them'     -- high frequency, very lapsed\n            when r_score <= 2 and f_score <= 2 and m_score <= 2\n                then 'Hibernating'          -- low on all dimensions\n            else 'Need Attention'           -- catch-all mid-tier\n        end                                     as rfm_segment\n\n    from scored\n)\n\nselect\n    customer_unique_id,\n    recency_days,\n    frequency,\n    monetary_value,\n    r_score,\n    f_score,\n    m_score,\n    rfm_score,\n    rfm_segment,\n    first_order_at,\n    last_order_at,\n    order_count\nfrom segmented\norder by rfm_score desc, monetary_value desc\n",
+    "description": "RFM scoring per customer. NTILE(5) quintile bucketing on recency, frequency, and monetary dimensions. Named segment labels for dashboard. Grain: one row per customer_unique_id.",
+    "tests": [
+      {
+        "name": "unique",
+        "column": "customer_unique_id"
+      },
+      {
+        "name": "not_null",
+        "column": "customer_unique_id"
+      },
+      {
+        "name": "not_null",
+        "column": "rfm_segment"
+      },
+      {
+        "name": "not_null",
+        "column": "rfm_score"
+      }
+    ],
+    "lineage": {
+      "ref": [
+        "int_orders_enriched"
+      ],
+      "source": []
+    },
+    "highlight": {
+      "id": "ntile",
+      "note": "NTILE(n) — splits ranked rows into n equal-sized buckets (quintiles here) in one pass, the SQL-native way to do quantile bucketing.",
+      "lines": [
+        72,
+        75,
+        78
+      ]
+    },
+    "rowcount": 94699
+  },
+  "mart_sellers": {
+    "layer": "mart",
+    "sql": "-- models/marts/mart_sellers.sql\n--\n-- Seller performance scorecard.\n--\n-- SQL techniques demonstrated:\n--   RANK() OVER()           → overall seller revenue ranking\n--   PERCENT_RANK() OVER()   → relative percentile position (0.0–1.0)\n--   Conditional aggregation → defect rate, late rate, negative review rate\n--   FILTER clause           → clean conditional counts without CASE WHEN noise\n--\n-- Grain: one row per seller_id.\n-- Feeds the Seller Performance dashboard page and the business recommendation\n-- on seller onboarding quality (newer sellers vs established).\n\nwith item_facts as (\n    select\n        oi.seller_id,\n        oi.seller_city,\n        oi.seller_state,\n        oi.order_id,\n        oi.item_price,\n        oi.freight_value,\n        oi.line_total,\n        oi.category_name_en,\n        o.order_status,\n        o.purchased_at,\n        o.delivered_at,\n        o.actual_delivery_days,\n        o.delivery_delta_days,\n        o.is_late_delivery,\n        o.review_score,\n        o.is_negative_review,\n        o.total_payment_value\n    from {{ ref('int_order_items_enriched') }} oi\n    inner join {{ ref('int_orders_enriched') }}  o\n        on oi.order_id = o.order_id\n),\n\n-- ── Step 1: aggregate seller metrics ───────────────────────────────────────\nseller_metrics as (\n    select\n        seller_id,\n        seller_city,\n        seller_state,\n\n        -- volume\n        count(distinct order_id)                                as total_orders,\n        count(*)                                                as total_items,\n        count(distinct category_name_en)                        as categories_sold,\n\n        -- revenue\n        round(sum(item_price),    2)                            as total_product_revenue,\n        round(sum(freight_value), 2)                            as total_freight_revenue,\n        round(sum(line_total),    2)                            as total_gross_revenue,\n        round(avg(item_price),    2)                            as avg_item_price,\n\n        -- delivery performance\n        round(avg(actual_delivery_days), 1)                     as avg_delivery_days,\n        round(avg(delivery_delta_days),  1)                     as avg_delivery_delta,\n\n        -- rates (conditional aggregation)\n        round(\n            count(*) filter (where is_late_delivery = true)::double\n            / nullif(count(*), 0) * 100,\n        2)                                                      as late_delivery_rate_pct,\n\n        round(\n            count(*) filter (where order_status = 'canceled')::double\n            / nullif(count(distinct order_id), 0) * 100,\n        2)                                                      as cancellation_rate_pct,\n\n        -- review quality\n        round(avg(review_score), 2)                             as avg_review_score,\n        round(\n            count(*) filter (where is_negative_review = true)::double\n            / nullif(count(*), 0) * 100,\n        2)                                                      as negative_review_rate_pct,\n\n        -- tenure proxy: first and last sale date\n        min(purchased_at)                                       as first_sale_at,\n        max(purchased_at)                                       as last_sale_at\n\n    from item_facts\n    where seller_id is not null\n    group by seller_id, seller_city, seller_state\n),\n\n-- ── Step 2: rank sellers on revenue and review score ───────────────────────\nranked as (\n    select\n        *,\n\n        -- RANK: 1 = top revenue seller (ties share a rank, gap after)\n        rank() over (order by total_gross_revenue desc)         as revenue_rank,\n\n        -- PERCENT_RANK: 1.0 = top seller, 0.0 = lowest\n        -- Useful for \"this seller is in the top 10% of revenue\"\n        round(\n            percent_rank() over (order by total_gross_revenue asc) * 100,\n        1)                                                      as revenue_percentile,\n\n        -- Rank by review quality\n        rank() over (order by avg_review_score desc nulls last) as review_rank,\n\n        -- Composite performance tier\n        case\n            when percent_rank() over (order by total_gross_revenue asc) >= 0.8\n                 and avg_review_score >= 4.0\n                then 'Elite'\n            when percent_rank() over (order by total_gross_revenue asc) >= 0.5\n                then 'Established'\n            when total_orders >= 5\n                then 'Growing'\n            else 'New'\n        end                                                     as seller_tier\n\n    from seller_metrics\n)\n\nselect * from ranked\norder by revenue_rank\n",
+    "description": "Seller performance scorecard. RANK() and PERCENT_RANK() on revenue, conditional aggregation for late delivery and cancellation rates. Grain: one row per seller_id.",
+    "tests": [
+      {
+        "name": "unique",
+        "column": "seller_id"
+      },
+      {
+        "name": "not_null",
+        "column": "seller_id"
+      },
+      {
+        "name": "not_null",
+        "column": "revenue_rank"
+      }
+    ],
+    "lineage": {
+      "ref": [
+        "int_order_items_enriched",
+        "int_orders_enriched"
+      ],
+      "source": []
+    },
+    "highlight": {
+      "id": "percent_rank",
+      "note": "PERCENT_RANK() — relative standing (0-1) within a partition, one window function instead of a manual count/total division.",
+      "lines": [
+        99,
+        107,
+        110
+      ]
+    },
+    "rowcount": 3095
+  }
+}

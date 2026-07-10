@@ -1,0 +1,364 @@
+
+> retailiq-dashboard@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1617ms
+ ○ Compiling / ...
+ ✓ Compiled / in 4.6s (1608 modules)
+ GET / 200 in 5702ms
+ GET / 200 in 43ms
+ ✓ Compiled /revenue in 496ms (1610 modules)
+ GET /revenue 200 in 801ms
+ ✓ Compiled /cohorts in 222ms (1614 modules)
+ GET /cohorts 200 in 309ms
+ ✓ Compiled /segments in 316ms (1634 modules)
+ GET /segments 200 in 457ms
+ ✓ Compiled /sellers in 284ms (1651 modules)
+ GET /sellers 200 in 422ms
+ ✓ Compiled /logistics in 489ms (1666 modules)
+ GET /logistics 200 in 650ms
+ GET /logistics 200 in 54ms
+ GET / 200 in 168ms
+ GET / 200 in 158ms
+ ✓ Compiled in 1265ms (1721 modules)
+ ✓ Compiled in 809ms (1685 modules)
+ ⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  <... target=... format={function format}>
+                         ^^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+digest: "3399074713"
+ ⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  <... target={98699} format={function format}>
+                             ^^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+digest: "2714729849"
+ ⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  <... target=... format={function format}>
+                         ^^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+digest: "3399074713"
+ ⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  <... target={98699} format={function format}>
+                             ^^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+digest: "2714729849"
+ ✓ Compiled in 270ms (858 modules)
+ ⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  <... target=... format={function format}>
+                         ^^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+digest: "3399074713"
+ ⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  <... target={98699} format={function format}>
+                             ^^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+digest: "2714729849"
+ ⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  <... target=... format={function format}>
+                         ^^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+digest: "3399074713"
+ ⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  <... target={98699} format={function format}>
+                             ^^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+digest: "2714729849"
+ ⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  <... target=... format={function format}>
+                         ^^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+digest: "3399074713"
+ ⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  <... target=... format={function format}>
+                         ^^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+digest: "3399074713"
+ GET / 500 in 290ms
+ GET / 500 in 400ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 721ms (1688 modules)
+ GET /_next/static/chunks/webpack.js 404 in 839ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 838ms
+ GET /_next/static/chunks/main-app.js 404 in 837ms
+ GET /_next/static/chunks/main-app.js 404 in 25ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 24ms
+ ✓ Compiled in 147ms (859 modules)
+ ✓ Compiled in 169ms (859 modules)
+ ✓ Compiled in 140ms (859 modules)
+ ✓ Compiled in 451ms (1685 modules)
+ ✓ Compiled in 338ms (1685 modules)
+ ✓ Compiled in 241ms (858 modules)
+ ✓ Compiled in 204ms (858 modules)
+ ✓ Compiled in 255ms (858 modules)
+ ⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  <... target=... format={function format}>
+                         ^^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+digest: "3399074713"
+ ⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  <... target={98699} format={function format}>
+                             ^^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+digest: "2714729849"
+ ⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  <... target=... format={function format}>
+                         ^^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+digest: "3399074713"
+ GET / 500 in 241ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 607ms (1688 modules)
+ GET /_next/static/chunks/main-app.js 404 in 708ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 516ms
+ ✓ Compiled in 911ms (1687 modules)
+ ✓ Compiled in 296ms (1689 modules)
+ ✓ Compiled in 238ms (1689 modules)
+ ✓ Compiled in 239ms (1689 modules)
+ ✓ Compiled in 235ms (1689 modules)
+ ✓ Compiled in 222ms (1689 modules)
+ ✓ Compiled in 275ms (1689 modules)
+ ✓ Compiled in 411ms (1689 modules)
+ ✓ Compiled in 233ms (1689 modules)
+ ✓ Compiled in 330ms (1689 modules)
+ ✓ Compiled in 244ms (1689 modules)
+ ✓ Compiled in 172ms (860 modules)
+ ✓ Compiled in 160ms (860 modules)
+ ✓ Compiled in 186ms (860 modules)
+ ✓ Compiled in 172ms (860 modules)
+ ✓ Compiled in 161ms (860 modules)
+ ✓ Compiled in 151ms (860 modules)
+ ✓ Compiled in 270ms (1689 modules)
+ ✓ Compiled in 164ms (860 modules)
+ ✓ Compiled in 433ms (1691 modules)
+ ✓ Compiled in 165ms (861 modules)
+ ✓ Compiled in 166ms (862 modules)
+ ✓ Compiled in 228ms (862 modules)
+ ✓ Compiled in 652ms (1692 modules)
+ ✓ Compiled /_not-found in 321ms (1695 modules)
+ GET /logistics 404 in 449ms
+ ⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  <... target=... format={function format}>
+                         ^^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+digest: "3399074713"
+ ⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  <... target={98699} format={function format}>
+                             ^^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+digest: "2714729849"
+ ⨯ Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+  <... target=... format={function format}>
+                         ^^^^^^^^^^^^^^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+digest: "3399074713"
+ GET / 500 in 134ms
+ ✓ Compiled in 334ms (1695 modules)
+ ✓ Compiled in 345ms (1695 modules)
+ ✓ Compiled in 332ms (863 modules)
+ ✓ Compiled in 214ms (862 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\.next\server\app\cohorts\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/cohorts/page' in C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\.next\server\app\cohorts\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/cohorts/page' in 'C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/cohorts/page (expected C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\.next\server\app\cohorts\page.js)
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\webpack\loaders\next-barrel-loader.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\webpack\loaders\next-barrel-loader.js
+<w>  at resolve commonjs C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\webpack\loaders\next-barrel-loader.js
+ ✓ Compiled in 768ms (862 modules)
+ ✓ Compiled in 240ms (863 modules)
+ ✓ Compiled in 738ms (863 modules)
+ ✓ Compiled in 188ms (863 modules)
+ ⨯ ./app/segments/page.tsx
+Error: 
+  [31mx[0m Expression expected
+     ,-[[36;1;4mC:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\app\segments\page.tsx[0m:95:1]
+ [2m 95[0m |   const winBackOpportunity = loyalists && winBackTargetCount ? winBackTargetCount * loyalists.avg_ltv : null;
+ [2m 96[0m | 
+ [2m 97[0m |   return (
+ [2m 98[0m |     <>
+     : [31;1m     ^[0m
+ [2m 99[0m |       <PageHeader
+ [2m100[0m |         eyebrow="SEGMENTS"
+ [2m101[0m |         title="Customer Segments"
+     `----
+
+  [31mx[0m Expected ',', got '{'
+     ,-[[36;1;4mC:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\app\segments\page.tsx[0m:102:1]
+ [2m102[0m |         subtitle="K-Means clustering on RFM features (recency, frequency, monetary), run independently of the rule-based mart_rfm quintile labels. Where the two methods disagree, the data is telling you something the fixed buckets missed."
+ [2m103[0m |       />
+ [2m104[0m | 
+ [2m105[0m |       {loyalists && champions && (
+     : [31;1m      ^[0m
+ [2m106[0m |         <div className="rq-v2" style={{ marginBottom: 20 }}>
+ [2m107[0m |           <AnalystNote
+ [2m108[0m |             figures={{
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/segments/page.tsx
+ ✓ Compiled in 312ms (1693 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\.next\server\app\cohorts\page.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/cohorts/page' in C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\server for build dependencies doesn't lead to expected result 'C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\.next\server\app\cohorts\page.js', but to 'Error: Can't resolve '../../../../.next/server/app/cohorts/page' in 'C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/cohorts/page (expected C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\.next\server\app\cohorts\page.js)
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\webpack\loaders\next-app-loader.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\compiled\webpack\bundle5.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\compiled\webpack\webpack.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\webpack\plugins\define-env-plugin.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\swc\index.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\swc\index.js
+<w>  at file dependencies C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\webpack\loaders\next-barrel-loader.js
+<w>  at file C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\webpack\loaders\next-barrel-loader.js
+<w>  at resolve commonjs C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\node_modules\next\dist\build\webpack\loaders\next-barrel-loader.js
+ ✓ Compiled in 243ms (863 modules)
+ ✓ Compiled in 157ms (863 modules)
+ ✓ Compiled in 240ms (862 modules)
+ ✓ Compiled in 175ms (862 modules)
+ ✓ Compiled in 815ms (862 modules)
+ ✓ Compiled in 900ms (1695 modules)
+ ✓ Compiled in 217ms (864 modules)
+ ✓ Compiled in 234ms (864 modules)
+ ✓ Compiled in 664ms (864 modules)
+ ✓ Compiled in 892ms (1709 modules)
+ ✓ Compiled in 269ms (1709 modules)
+ ✓ Compiled in 327ms (1702 modules)
+ ✓ Compiled in 374ms (1702 modules)
+ ✓ Compiled in 222ms (868 modules)
+ ✓ Compiled in 262ms (868 modules)
+ ✓ Compiled in 191ms (868 modules)
+ ✓ Compiled in 190ms (868 modules)
+ ✓ Compiled in 182ms (868 modules)
+ ✓ Compiled in 166ms (868 modules)
+ ✓ Compiled in 243ms (868 modules)
+ ✓ Compiled in 194ms (868 modules)
+ ✓ Compiled in 452ms (1702 modules)
+ ✓ Compiled in 229ms (1702 modules)
+ ✓ Compiled in 1633ms (1702 modules)
+ ✓ Compiled in 342ms (1702 modules)
+ ✓ Compiled in 419ms (1704 modules)
+ ✓ Compiled in 317ms (1704 modules)
+ ✓ Compiled in 363ms (1704 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Restoring pack from C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\.next\cache\webpack\server-development.pack.gz failed: TypeError: Cannot read properties of undefined (reading 'hasStartTime')
+ ✓ Compiled in 347ms (1706 modules)
+ ✓ Compiled in 227ms (1706 modules)
+ ✓ Compiled in 296ms (1706 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Restoring pack from C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\.next\cache\webpack\server-development.pack.gz failed: TypeError: Cannot read properties of undefined (reading 'hasStartTime')
+ ✓ Compiled in 167ms (851 modules)
+ ✓ Compiled in 117ms (279 modules)
+ ✓ Compiled in 101ms (279 modules)
+ ✓ Compiled in 60ms (279 modules)
+ ✓ Compiled in 58ms (279 modules)
+ ✓ Compiled in 68ms (279 modules)
+ ✓ Compiled in 70ms (279 modules)
+ ✓ Compiled in 89ms (279 modules)
+ ✓ Compiled in 96ms (279 modules)
+[Error: ENOENT: no such file or directory, stat 'C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\.next\cache\webpack\client-development\1.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\Users\\Sam Garcia\\PycharmProjects\\retailiq\\dashboard\\.next\\cache\\webpack\\client-development\\1.pack.gz'
+}
+ ⨯ unhandledRejection: [Error: ENOENT: no such file or directory, stat 'C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\.next\cache\webpack\client-development\1.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\Users\\Sam Garcia\\PycharmProjects\\retailiq\\dashboard\\.next\\cache\\webpack\\client-development\\1.pack.gz'
+}
+ ⨯ unhandledRejection: [Error: ENOENT: no such file or directory, stat 'C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\.next\cache\webpack\client-development\1.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\Users\\Sam Garcia\\PycharmProjects\\retailiq\\dashboard\\.next\\cache\\webpack\\client-development\\1.pack.gz'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat 'C:\Users\Sam Garcia\PycharmProjects\retailiq\dashboard\.next\cache\webpack\client-development\1.pack.gz'
+ ✓ Compiled in 398ms (278 modules)
+ ✓ Compiled in 71ms (279 modules)
+ ✓ Compiled in 1423ms (293 modules)
+ ✓ Compiled in 77ms (279 modules)
+ ✓ Compiled in 110ms (293 modules)
+ ✓ Compiled in 81ms (293 modules)
+ ✓ Compiled / in 243ms (532 modules)
+ GET / 200 in 398ms
+ ✓ Compiled /_not-found in 145ms (535 modules)
+ GET /_next/static/css/app/layout.css?v=1783625986617 404 in 224ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 154ms
+ GET /_next/static/chunks/main-app.js?v=1783625986617 404 in 155ms
+ GET / 200 in 50ms
+ GET /_next/static/css/app/layout.css?v=1783625989655 404 in 14ms
+ GET /_next/static/chunks/main-app.js?v=1783625989655 404 in 21ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 20ms
+[TypeError: fetch failed] {
+  [cause]: AggregateError [ECONNREFUSED]: 
+      at internalConnectMultiple (node:net:1193:18)
+      at afterConnectMultiple (node:net:1783:7) {
+    code: 'ECONNREFUSED',
+    [errors]: [ [Error], [Error] ]
+  }
+}
+ GET / 200 in 53ms
+ GET /_next/static/css/app/layout.css?v=1783625993371 404 in 81ms
+ GET /_next/static/chunks/main-app.js?v=1783625993371 404 in 25ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 23ms
+[TypeError: fetch failed] {
+  [cause]: AggregateError [ECONNREFUSED]: 
+      at internalConnectMultiple (node:net:1193:18)
+      at afterConnectMultiple (node:net:1783:7) {
+    code: 'ECONNREFUSED',
+    [errors]: [ [Error], [Error] ]
+  }
+}
+ GET / 200 in 52ms
+ GET /_next/static/css/app/layout.css?v=1783625995307 404 in 24ms
+ GET /_next/static/chunks/main-app.js?v=1783625995307 404 in 21ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 20ms

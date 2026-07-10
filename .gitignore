@@ -1,0 +1,43 @@
+# ── Data & warehouse ──────────────────────────────────────────────────────────
+data/raw/               # Olist CSVs — too large for git; instructions in README
+warehouse/              # DuckDB binary file
+*.duckdb
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# ── dbt ───────────────────────────────────────────────────────────────────────
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+# profiles.yml is committed here because it uses env vars for secrets;
+# the actual DuckDB path is the only "credential" and it's not sensitive.
+
+# ── Jupyter ───────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── AI commentary cache (Phase 6 — regenerated from mart data, see api/commentary.py) ──
+api/.cache/
+
+# ── Env / secrets ─────────────────────────────────────────────────────────────
+.env
+*.env
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── IDEs ──────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.cursor-rules

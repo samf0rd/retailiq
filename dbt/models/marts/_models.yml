@@ -1,0 +1,71 @@
+version: 2
+
+models:
+  - name: mart_revenue
+    description: >
+      Monthly revenue by category. Window functions: LAG() for MoM growth,
+      SUM() OVER() for running totals, RANK() for category ranking per month.
+      Grain: one row per (order_month, category_name_en).
+    columns:
+      - name: order_month
+        tests: [not_null]
+      - name: category_name_en
+        tests: [not_null]
+      - name: gross_revenue
+        tests: [not_null]
+
+  - name: mart_cohorts
+    description: >
+      Customer retention matrix by acquisition cohort.
+      Grain: one row per (cohort_month, periods_since_first_order).
+    columns:
+      - name: cohort_month
+        tests: [not_null]
+      - name: periods_since_first_order
+        tests: [not_null]
+      - name: cohort_size
+        tests: [not_null]
+      - name: retention_rate_pct
+        tests: [not_null]
+
+  - name: mart_rfm
+    description: >
+      RFM scoring per customer. NTILE(5) quintile bucketing on recency,
+      frequency, and monetary dimensions. Named segment labels for dashboard.
+      Grain: one row per customer_unique_id.
+    columns:
+      - name: customer_unique_id
+        tests:
+          - unique
+          - not_null
+      - name: rfm_segment
+        tests: [not_null]
+      - name: rfm_score
+        tests: [not_null]
+
+  - name: mart_sellers
+    description: >
+      Seller performance scorecard. RANK() and PERCENT_RANK() on revenue,
+      conditional aggregation for late delivery and cancellation rates.
+      Grain: one row per seller_id.
+    columns:
+      - name: seller_id
+        tests:
+          - unique
+          - not_null
+      - name: revenue_rank
+        tests: [not_null]
+
+  - name: mart_logistics
+    description: >
+      Delivery performance by customer_state × order_month. PERCENTILE_CONT()
+      for median/p95 delivery days, CORR() for delivery-review correlation,
+      gap-and-island logic for consecutive late-delivery streaks by state.
+      Grain: one row per (customer_state, order_month).
+    columns:
+      - name: customer_state
+        tests: [not_null]
+      - name: order_month
+        tests: [not_null]
+      - name: late_rate_pct
+        tests: [not_null]
