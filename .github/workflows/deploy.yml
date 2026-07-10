@@ -1,0 +1,41 @@
+name: Deploy to Hetzner
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/retailiq
+
+            echo "→ Pulling latest code"
+            git pull origin main
+
+            echo "→ Writing secrets"
+            cat > .env <<EOF
+            ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}
+            EOF
+
+            echo "→ Rebuilding and restarting containers"
+            docker compose build
+            docker compose up -d --remove-orphans
+
+            echo "→ Pruning old images"
+            docker image prune -f
+
+            echo "→ Health check"
+            sleep 5
+            curl -f http://localhost:8001/health || (docker compose logs api --tail=50 && exit 1)
+
+            echo "✓ Deploy complete"
