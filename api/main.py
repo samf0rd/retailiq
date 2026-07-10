@@ -84,8 +84,19 @@ def q(sql: str, params: Optional[list] = None):
     return df.to_dict(orient="records")
 
 
-@app.get("/api/health")
+@app.get("/health")
 def health():
+    # Docker's HEALTHCHECK hits this path (see docker-compose.yml / deploy.yml).
+    # A trivial SELECT 1 makes sure a broken/missing warehouse mount reports
+    # unhealthy instead of a fake pass.
+    if _con is None:
+        raise HTTPException(status_code=503, detail=f"Warehouse not found at {DB_PATH}")
+    _con.cursor().execute("select 1").fetchone()
+    return {"status": "ok"}
+
+
+@app.get("/api/health")
+def api_health():
     return {"status": "ok", "warehouse_connected": _con is not None}
 
 

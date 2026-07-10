@@ -1,29 +1,37 @@
-# api/Dockerfile
-# FastAPI read layer over the DuckDB warehouse file.
-# The warehouse file itself is NOT baked into the image (it's data, not code) —
-# it's mounted as a volume at runtime so a warehouse rebuild doesn't require
-# a new image build.
+# dashboard/Dockerfile
+# Multi-stage build: install deps → build → copy only the standalone output
+# into a slim runtime image. Requires next.config.mjs to have
+# `output: 'standalone'`.
 
-FROM python:3.11-slim
-
+FROM node:20-slim AS deps
 WORKDIR /app
+COPY dashboard/package.json dashboard/package-lock.json* ./
+RUN npm ci
 
-# System deps DuckDB sometimes wants for building from source wheels; slim
-# image usually has prebuilt wheels available so this stays minimal.
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+FROM node:20-slim AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY dashboard/ ./
+# scripts/bundle-models.mjs (npm's prebuild hook) reads dbt/models/* as the
+# source of truth for the SQL shown in <SqlDrawer> / Methodology page. It
+# locates that dir by going two levels up from its own path (repo_root/
+# dashboard/scripts/../.. == repo_root locally). Since dashboard/'s contents
+# are flattened into /app here, the same two-levels-up lands at container
+# root, so dbt/models must live at /dbt/models, not /app/dbt/models.
+COPY dbt/models /dbt/models
+# This project has no public/ dir (no static assets yet). Next.js doesn't
+# require one, but the runner stage below copies it unconditionally, so make
+# sure it exists (even empty) rather than failing the build.
+RUN mkdir -p public
+RUN npm run build
 
-COPY api/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+FROM node:20-slim AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
-COPY api/ ./api/
-
-ENV RETAILIQ_DB_PATH=/data/retailiq.duckdb
-ENV PYTHONUNBUFFERED=1
-
-EXPOSE 8000
-
-# --workers 1: DuckDB's read-only single-file connection is the constraint
-# from db.py's docstring — keep one worker unless that's revisited.
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+EXPOSE 3000
+ENV PORT=3000
+CMD ["node", "server.js"]
