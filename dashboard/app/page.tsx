@@ -1,10 +1,11 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { LayoutDashboard, TrendingUp, Layers, PieChart, Store, Truck } from 'lucide-react';
 import HeroSparkline from '@/components/HeroSparkline';
 import { StaggerIn } from '@/components/v2/motion';
-import { apiGet, ApiError, RevenueRow } from '@/lib/api';
-
-export const dynamic = 'force-dynamic';
+import { apiGet, RevenueRow } from '@/lib/api';
 
 const AREAS = [
   { icon: LayoutDashboard, label: 'Exec Summary', href: '/app', hook: 'The 30-second version — headline revenue, growth, and where it’s really coming from.' },
@@ -29,22 +30,32 @@ const CREDIBILITY_CHIPS = [
  * Green used exactly once here (the sparkline + the single CTA), per the
  * restraint rule (PRD §1).
  */
-export default async function LandingPage() {
-  let monthlyTotals: { order_month: string; revenue: number }[] = [];
-  try {
-    const revenue = await apiGet<RevenueRow[]>('/api/revenue');
-    monthlyTotals = Object.values(
-      revenue.reduce<Record<string, { order_month: string; revenue: number }>>((acc, r) => {
-        acc[r.order_month] = acc[r.order_month] ?? { order_month: r.order_month, revenue: 0 };
-        acc[r.order_month].revenue += r.gross_revenue;
-        return acc;
-      }, {})
-    ).sort((a, b) => a.order_month.localeCompare(b.order_month));
-  } catch (e) {
-    // Landing must never hard-fail just because the warehouse is cold —
-    // the hero's sparkline is a nice-to-have proof, not the page's substance.
-    monthlyTotals = [];
-  }
+export default function LandingPage() {
+  const [monthlyTotals, setMonthlyTotals] = useState<{ order_month: string; revenue: number }[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    apiGet<RevenueRow[]>('/api/revenue')
+      .then((revenue) => {
+        if (cancelled) return;
+        const totals = Object.values(
+          revenue.reduce<Record<string, { order_month: string; revenue: number }>>((acc, r) => {
+            acc[r.order_month] = acc[r.order_month] ?? { order_month: r.order_month, revenue: 0 };
+            acc[r.order_month].revenue += r.gross_revenue;
+            return acc;
+          }, {})
+        ).sort((a, b) => a.order_month.localeCompare(b.order_month));
+        setMonthlyTotals(totals);
+      })
+      .catch(() => {
+        // Landing must never hard-fail just because the warehouse is cold —
+        // the hero's sparkline is a nice-to-have proof, not the page's substance.
+        if (!cancelled) setMonthlyTotals([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="rq-v2" style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>

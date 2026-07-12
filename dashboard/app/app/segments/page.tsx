@@ -1,4 +1,8 @@
+'use client';
+
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import PageHeader from '@/components/PageHeader';
 import Panel from '@/components/Panel';
 import WarehouseNotice from '@/components/WarehouseNotice';
@@ -15,8 +19,6 @@ import {
   RepeatPropensityRow,
   KmeansCustomerRow,
 } from '@/lib/api';
-
-export const dynamic = 'force-dynamic';
 
 interface SegMetrics {
   kmeans: { silhouette_score: number; k: number };
@@ -49,23 +51,24 @@ const SECOND_ORDER_RATE: Record<string, number> = {
   Champions: 100,
 };
 
-export default async function SegmentsPage({
-  searchParams,
-}: {
-  searchParams: { tier?: string; segment?: string };
-}) {
-  const tier = searchParams.tier || undefined;
-  const segment = searchParams.segment || undefined;
+function SegmentsPageContent() {
+  const searchParams = useSearchParams();
+  const tier = searchParams.get('tier') || undefined;
+  const segment = searchParams.get('segment') || undefined;
 
-  let econ: KmeansSegmentEconomics[] = [];
-  let targets: RetentionTarget[] = [];
-  let metrics: SegMetrics | null = null;
-  let propensityRows: RepeatPropensityRow[] = [];
-  let segmentCustomers: KmeansCustomerRow[] = [];
-  let error: string | null = null;
+  const [econ, setEcon] = useState<KmeansSegmentEconomics[]>([]);
+  const [targets, setTargets] = useState<RetentionTarget[]>([]);
+  const [metrics, setMetrics] = useState<SegMetrics | null>(null);
+  const [propensityRows, setPropensityRows] = useState<RepeatPropensityRow[]>([]);
+  const [segmentCustomers, setSegmentCustomers] = useState<KmeansCustomerRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  try {
-    const [econRes, targetsRes, metricsRes, propensityRes, segmentRes] = await Promise.all([
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    Promise.all([
       apiGet<KmeansSegmentEconomics[]>('/api/segments/economics'),
       apiGet<RetentionTarget[]>('/api/segments/retention-targets'),
       apiGet<SegMetrics>('/api/segments/metrics'),
@@ -73,14 +76,35 @@ export default async function SegmentsPage({
       segment
         ? apiGet<KmeansCustomerRow[]>('/api/segments/kmeans', { segment, limit: 50 })
         : Promise.resolve([] as KmeansCustomerRow[]),
-    ]);
-    econ = econRes;
-    targets = targetsRes;
-    metrics = metricsRes;
-    propensityRows = propensityRes;
-    segmentCustomers = segmentRes;
-  } catch (e) {
-    error = e instanceof ApiError ? e.message : 'Unknown error';
+    ])
+      .then(([econRes, targetsRes, metricsRes, propensityRes, segmentRes]) => {
+        if (cancelled) return;
+        setEcon(econRes);
+        setTargets(targetsRes);
+        setMetrics(metricsRes);
+        setPropensityRows(propensityRes);
+        setSegmentCustomers(segmentRes);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof ApiError ? e.message : 'Unknown error');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [tier, segment]);
+
+  if (loading) {
+    return (
+      <>
+        <PageHeader eyebrow="SEGMENTS" title="Customer Segments" />
+        <div className="rq-v2" style={{ color: 'var(--text-lo)', fontSize: 'var(--t-sm)' }}>
+          Loading…
+        </div>
+      </>
+    );
   }
 
   if (error) {
@@ -408,5 +432,13 @@ export default async function SegmentsPage({
         </table>
       </Panel>
     </>
+  );
+}
+
+export default function SegmentsPage() {
+  return (
+    <Suspense fallback={<PageHeader eyebrow="SEGMENTS" title="Customer Segments" />}>
+      <SegmentsPageContent />
+    </Suspense>
   );
 }

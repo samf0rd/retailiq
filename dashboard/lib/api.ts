@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
 
 export class ApiError extends Error {
   status: number;
@@ -9,9 +9,9 @@ export class ApiError extends Error {
 }
 
 /**
- * Fetch JSON from the FastAPI backend. Every dashboard page uses this —
- * never fetches ad hoc — so error/loading handling stays consistent.
- * Server components can call this directly (no client-side waterfall).
+ * Fetch JSON from the FastAPI backend, from the browser. Every dashboard
+ * page uses this — never fetches ad hoc — so error/loading handling stays
+ * consistent.
  */
 export async function apiGet<T>(path: string, params?: Record<string, string | number | undefined>): Promise<T> {
   const qs = params
@@ -22,11 +22,7 @@ export async function apiGet<T>(path: string, params?: Record<string, string | n
         .join('&')
     : '';
 
-  const res = await fetch(`${API_BASE}${path}${qs}`, {
-    // Marts refresh on a batch cadence (dbt/ML run), not per-request —
-    // short revalidation window is enough to feel live without hammering DuckDB.
-    next: { revalidate: 60 },
-  });
+  const res = await fetch(`${API_BASE}${path}${qs}`);
 
   if (!res.ok) {
     const detail = await res.text().catch(() => res.statusText);

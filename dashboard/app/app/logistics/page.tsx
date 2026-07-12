@@ -1,4 +1,8 @@
+'use client';
+
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import PageHeader from '@/components/PageHeader';
 import Panel from '@/components/Panel';
 import Rate from '@/components/Rate';
@@ -12,25 +16,49 @@ import { apiGet, ApiError, LogisticsRow } from '@/lib/api';
 import { hasSufficientSample, correlationStrength, MIN_SAMPLE_ORDERS } from '@/lib/logistics';
 import { getCaveats } from '@/ai/caveats';
 
-export const dynamic = 'force-dynamic';
-
-export default async function LogisticsPage({ searchParams }: { searchParams: { state?: string } }) {
-  const state = searchParams.state || undefined;
+function LogisticsPageContent() {
+  const searchParams = useSearchParams();
+  const state = searchParams.get('state') || undefined;
   const isDrillDown = Boolean(state);
 
-  let rows: LogisticsRow[] = [];
-  let states: string[] = [];
-  let error: string | null = null;
+  const [rows, setRows] = useState<LogisticsRow[]>([]);
+  const [states, setStates] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  try {
-    const [logisticsRows, stateRows] = await Promise.all([
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    Promise.all([
       apiGet<LogisticsRow[]>('/api/logistics', { state }),
       apiGet<{ customer_state: string }[]>('/api/meta/states'),
-    ]);
-    rows = logisticsRows;
-    states = stateRows.map((s) => s.customer_state);
-  } catch (e) {
-    error = e instanceof ApiError ? e.message : 'Unknown error';
+    ])
+      .then(([logisticsRows, stateRows]) => {
+        if (cancelled) return;
+        setRows(logisticsRows);
+        setStates(stateRows.map((s) => s.customer_state));
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof ApiError ? e.message : 'Unknown error');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [state]);
+
+  if (loading) {
+    return (
+      <>
+        <PageHeader eyebrow="LOGISTICS" title="Logistics & Ops" />
+        <div className="rq-v2" style={{ color: 'var(--text-lo)', fontSize: 'var(--t-sm)' }}>
+          Loading…
+        </div>
+      </>
+    );
   }
 
   if (error) {
@@ -248,5 +276,13 @@ export default async function LogisticsPage({ searchParams }: { searchParams: { 
         </p>
       </Panel>
     </>
+  );
+}
+
+export default function LogisticsPage() {
+  return (
+    <Suspense fallback={<PageHeader eyebrow="LOGISTICS" title="Logistics & Ops" />}>
+      <LogisticsPageContent />
+    </Suspense>
   );
 }

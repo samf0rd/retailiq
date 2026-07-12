@@ -1,11 +1,12 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import PageHeader from '@/components/PageHeader';
 import Panel from '@/components/Panel';
 import WarehouseNotice from '@/components/WarehouseNotice';
 import AnalystNote from '@/components/v2/AnalystNote';
 import Recommendation from '@/components/v2/Recommendation';
 import { apiGet, ApiError, CohortRow } from '@/lib/api';
-
-export const dynamic = 'force-dynamic';
 
 // --accent (#3fb98c) as an RGB triple, so the heatmap ramp can vary its own
 // alpha channel from accent-wash-level (~0.08) up to fully solid — a single-
@@ -53,14 +54,39 @@ const OVERALL_REPEAT_RATE_PCT = 3.0;
 const MEDIAN_DAYS_TO_SECOND_ORDER = 28;
 const SHARE_SECOND_ORDERS_WITHIN_30D_PCT = 50.9;
 
-export default async function CohortsPage() {
-  let rows: CohortRow[] = [];
-  let error: string | null = null;
+export default function CohortsPage() {
+  const [rows, setRows] = useState<CohortRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  try {
-    rows = await apiGet<CohortRow[]>('/api/cohorts');
-  } catch (e) {
-    error = e instanceof ApiError ? e.message : 'Unknown error';
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    apiGet<CohortRow[]>('/api/cohorts')
+      .then((res) => {
+        if (!cancelled) setRows(res);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof ApiError ? e.message : 'Unknown error');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <>
+        <PageHeader eyebrow="COHORTS" title="Cohort Analysis" />
+        <div className="rq-v2" style={{ color: 'var(--text-lo)', fontSize: 'var(--t-sm)' }}>
+          Loading…
+        </div>
+      </>
+    );
   }
 
   if (error) {

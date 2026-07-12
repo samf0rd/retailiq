@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import IntroHero from '@/components/IntroHero';
 import Panel from '@/components/v2/Panel';
@@ -11,8 +14,6 @@ import { StaggerIn } from '@/components/v2/motion';
 import { fmtBRL } from '@/lib/format';
 import { apiGet, ApiError, RevenueRow, RevenueSummary } from '@/lib/api';
 
-export const dynamic = 'force-dynamic';
-
 /**
  * Exec Summary — the v2 token/primitive system's proving ground (PRD §10),
  * since expanded with the AI re-scope (R2), SQL drawer (R3), and tour
@@ -25,18 +26,42 @@ export const dynamic = 'force-dynamic';
  * via Panel's `sqlTriggerId`) are the DOM targets components/Tour.tsx's
  * config-driven steps spotlight — see components/TourProvider.tsx.
  */
-export default async function ExecutiveSummaryPage() {
-  let summary: RevenueSummary | null = null;
-  let revenue: RevenueRow[] = [];
-  let error: string | null = null;
+export default function ExecutiveSummaryPage() {
+  const [summary, setSummary] = useState<RevenueSummary | null>(null);
+  const [revenue, setRevenue] = useState<RevenueRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  try {
-    [summary, revenue] = await Promise.all([
-      apiGet<RevenueSummary>('/api/revenue/summary'),
-      apiGet<RevenueRow[]>('/api/revenue'),
-    ]);
-  } catch (e) {
-    error = e instanceof ApiError ? e.message : 'Unknown error';
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    Promise.all([apiGet<RevenueSummary>('/api/revenue/summary'), apiGet<RevenueRow[]>('/api/revenue')])
+      .then(([summaryRes, revenueRes]) => {
+        if (cancelled) return;
+        setSummary(summaryRes);
+        setRevenue(revenueRes);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof ApiError ? e.message : 'Unknown error');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <>
+        <IntroHero />
+        <div className="rq-v2" style={{ color: 'var(--text-lo)', fontSize: 'var(--t-sm)' }}>
+          Loading…
+        </div>
+      </>
+    );
   }
 
   if (error || !summary) {

@@ -9,7 +9,7 @@ import { useState } from 'react';
  * number) and cites which mart(s) it drew from. An honest "can't answer
  * from what's here" is a valid, expected response, not an error state.
  */
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
 
 const EXAMPLE_QUESTIONS = [
   'What is total revenue and how many orders?',

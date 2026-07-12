@@ -1,3 +1,7 @@
+'use client';
+
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import PageHeader from '@/components/PageHeader';
 import Panel from '@/components/Panel';
 import WarehouseNotice from '@/components/WarehouseNotice';
@@ -8,8 +12,6 @@ import AnalystNote from '@/components/v2/AnalystNote';
 import Recommendation from '@/components/v2/Recommendation';
 import { apiGet, ApiError, SellerRow } from '@/lib/api';
 import { fmtBRL } from '@/lib/format';
-
-export const dynamic = 'force-dynamic';
 
 // This page's own /api/sellers call is capped at the top 100 by revenue (see
 // below) — these platform-wide figures span all 3,095 sellers and were
@@ -25,16 +27,42 @@ const PLATFORM_SELLERS = {
   lateAmongTopDecileRevenue: 1559269.91,
 };
 
-export default async function SellersPage({ searchParams }: { searchParams: { tier?: string } }) {
-  const tier = searchParams.tier || undefined;
+function SellersPageContent() {
+  const searchParams = useSearchParams();
+  const tier = searchParams.get('tier') || undefined;
 
-  let rows: SellerRow[] = [];
-  let error: string | null = null;
+  const [rows, setRows] = useState<SellerRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  try {
-    rows = await apiGet<SellerRow[]>('/api/sellers', { tier, limit: 100 });
-  } catch (e) {
-    error = e instanceof ApiError ? e.message : 'Unknown error';
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    apiGet<SellerRow[]>('/api/sellers', { tier, limit: 100 })
+      .then((res) => {
+        if (!cancelled) setRows(res);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof ApiError ? e.message : 'Unknown error');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [tier]);
+
+  if (loading) {
+    return (
+      <>
+        <PageHeader eyebrow="SELLERS" title="Seller Performance" />
+        <div className="rq-v2" style={{ color: 'var(--text-lo)', fontSize: 'var(--t-sm)' }}>
+          Loading…
+        </div>
+      </>
+    );
   }
 
   if (error) {
@@ -122,5 +150,13 @@ export default async function SellersPage({ searchParams }: { searchParams: { ti
         <SellersTable rows={rows} />
       </Panel>
     </>
+  );
+}
+
+export default function SellersPage() {
+  return (
+    <Suspense fallback={<PageHeader eyebrow="SELLERS" title="Seller Performance" />}>
+      <SellersPageContent />
+    </Suspense>
   );
 }

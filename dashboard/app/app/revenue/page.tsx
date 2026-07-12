@@ -1,4 +1,8 @@
+'use client';
+
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import PageHeader from '@/components/PageHeader';
 import Panel from '@/components/Panel';
 import Delta from '@/components/Delta';
@@ -10,38 +14,58 @@ import Recommendation from '@/components/v2/Recommendation';
 import { apiGet, ApiError, RevenueRow } from '@/lib/api';
 import { fmtBRL } from '@/lib/format';
 
-export const dynamic = 'force-dynamic';
-
-export default async function RevenuePage({
-  searchParams,
-}: {
-  searchParams: { category?: string; start_month?: string; end_month?: string };
-}) {
-  const category = searchParams.category || undefined;
-  const startMonth = searchParams.start_month || undefined;
-  const endMonth = searchParams.end_month || undefined;
+function RevenuePageContent() {
+  const searchParams = useSearchParams();
+  const category = searchParams.get('category') || undefined;
+  const startMonth = searchParams.get('start_month') || undefined;
+  const endMonth = searchParams.get('end_month') || undefined;
   const hasMonthFilter = Boolean(startMonth || endMonth);
   const isDrillDown = Boolean(category);
 
-  let allRows: RevenueRow[] = []; // unfiltered — populates the month dropdown + default (no-filter) view
-  let displayRows: RevenueRow[] = []; // real, backend-filtered rows actually rendered in the table
-  let categories: string[] = [];
-  let error: string | null = null;
+  const [allRows, setAllRows] = useState<RevenueRow[]>([]); // unfiltered — populates the month dropdown + default (no-filter) view
+  const [displayRows, setDisplayRows] = useState<RevenueRow[]>([]); // real, backend-filtered rows actually rendered in the table
+  const [categories, setCategories] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  try {
-    const [all, cats] = await Promise.all([
-      apiGet<RevenueRow[]>('/api/revenue'),
-      apiGet<{ category_name_en: string }[]>('/api/meta/categories'),
-    ]);
-    allRows = all;
-    categories = cats.map((c) => c.category_name_en);
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    (async () => {
+      try {
+        const [all, cats] = await Promise.all([
+          apiGet<RevenueRow[]>('/api/revenue'),
+          apiGet<{ category_name_en: string }[]>('/api/meta/categories'),
+        ]);
+        const display =
+          category || hasMonthFilter
+            ? await apiGet<RevenueRow[]>('/api/revenue', { category, start_month: startMonth, end_month: endMonth })
+            : all;
+        if (cancelled) return;
+        setAllRows(all);
+        setCategories(cats.map((c) => c.category_name_en));
+        setDisplayRows(display);
+      } catch (e) {
+        if (!cancelled) setError(e instanceof ApiError ? e.message : 'Unknown error');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [category, startMonth, endMonth, hasMonthFilter]);
 
-    displayRows =
-      category || hasMonthFilter
-        ? await apiGet<RevenueRow[]>('/api/revenue', { category, start_month: startMonth, end_month: endMonth })
-        : allRows;
-  } catch (e) {
-    error = e instanceof ApiError ? e.message : 'Unknown error';
+  if (loading) {
+    return (
+      <>
+        <PageHeader eyebrow="REVENUE" title="Revenue Deep Dive" />
+        <div className="rq-v2" style={{ color: 'var(--text-lo)', fontSize: 'var(--t-sm)' }}>
+          Loading…
+        </div>
+      </>
+    );
   }
 
   if (error) {
@@ -213,5 +237,13 @@ export default async function RevenuePage({
         </table>
       </Panel>
     </>
+  );
+}
+
+export default function RevenuePage() {
+  return (
+    <Suspense fallback={<PageHeader eyebrow="REVENUE" title="Revenue Deep Dive" />}>
+      <RevenuePageContent />
+    </Suspense>
   );
 }

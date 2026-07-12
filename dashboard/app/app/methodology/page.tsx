@@ -1,7 +1,9 @@
+'use client';
+
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import MethodologyGraph from '@/components/v2/MethodologyGraph';
 import TechniquesIndex from '@/components/v2/TechniquesIndex';
-
-export const metadata = { title: 'Methodology — RetailIQ' };
 
 /**
  * The Methodology page (PRD §7.2) — "the dashboard is the conclusion; this
@@ -10,7 +12,10 @@ export const metadata = { title: 'Methodology — RetailIQ' };
  * pattern, and the SQL-techniques index — the explicit SQL-proficiency
  * proof every other page's "View SQL" drawer is a shortcut into.
  */
-export default function MethodologyPage({ searchParams }: { searchParams: { model?: string } }) {
+function MethodologyPageContent() {
+  const searchParams = useSearchParams();
+  const model = searchParams.get('model') || undefined;
+
   return (
     <div className="rq-v2">
       <div style={{ marginBottom: 'var(--s-8)' }}>
@@ -50,7 +55,7 @@ export default function MethodologyPage({ searchParams }: { searchParams: { mode
         </div>
       </div>
 
-      <MethodologyGraph initialModel={searchParams.model} />
+      <MethodologyGraph initialModel={model} />
 
       <div style={{ marginTop: 'var(--s-10)' }}>
         <div style={{ marginBottom: 'var(--s-5)' }}>
@@ -74,5 +79,13 @@ export default function MethodologyPage({ searchParams }: { searchParams: { mode
         </div>
       </div>
     </div>
+  );
+}
+
+export default function MethodologyPage() {
+  return (
+    <Suspense fallback={null}>
+      <MethodologyPageContent />
+    </Suspense>
   );
 }
