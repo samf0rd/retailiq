@@ -18,6 +18,11 @@ COPY api/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY api/ ./api/
+# ml/outputs/*.json (segmentation + propensity metrics, committed to git) are
+# read at runtime via a path relative to cwd (ML_OUTPUTS_DIR default
+# "ml/outputs" in api/main.py) — baked into the image here rather than
+# volume-mounted, since they're small, versioned artifacts, not warehouse data.
+COPY ml/outputs/ ./ml/outputs/
 
 ENV RETAILIQ_DB_PATH=/data/retailiq.duckdb
 ENV PYTHONUNBUFFERED=1

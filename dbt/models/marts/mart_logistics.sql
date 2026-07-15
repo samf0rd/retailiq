@@ -160,4 +160,4 @@ left join (
     from late_streaks
     order by customer_state, streak_end desc
 ) ls on sm.customer_state = ls.customer_state
-order by customer_state, order_month
+order by sm.customer_state, sm.order_month
